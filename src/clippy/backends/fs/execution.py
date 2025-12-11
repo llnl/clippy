@@ -119,18 +119,11 @@ def _stream_exec(
                 # Process terminated, read any remaining output
                 break
 
-    print(f"{stderr_lines=}")
-    print(f"{(stderr_lines==True)}")
-    print(f"{(stderr_lines==False)}")
     stderr = "".join(stderr_lines) if stderr_lines else None
-    print(f"{stderr=}")
-    print(f"{(stderr is None)=}")
-    print(f"{proc.returncode=}")
     if progress is not None:
         progress.close()
-    if proc.returncode:
-        print("RETURNCODE!!!!")
-        raise (ClippyValidationError(stderr) if validate else ClippyBackendError(stderr))
+    # if proc.returncode:
+    #     raise (ClippyValidationError(stderr) if validate else ClippyBackendError(stderr))
 
     if not d:
         return None, stderr, proc.returncode
@@ -158,9 +151,6 @@ def _validate(
     logger.debug("Validating %s", cmd)
 
     _, stderr, retcode = _stream_exec(execcmd, dct, logger, validate=True)
-    print(f"in validate {stderr=}")
-    print(f"in validate {(stderr is not None)=}")
-    print(f"in validate: {retcode=}")
     return retcode == 0, stderr or ""
 
 
