@@ -36,7 +36,7 @@ def _stream_exec(
     submission_dict: AnyDict,
     logger: logging.Logger,
     validate: bool,
-) -> tuple[AnyDict | None, str | None]:
+) -> tuple[AnyDict | None, str | None, int]:
     """
     Internal function.
 
@@ -45,7 +45,7 @@ def _stream_exec(
 
     Logs debug messages with progress.
     Parses the object and returns a dictionary output.
-    Returns the process result object.
+    Returns the process result object, stderr, and the process return code.
 
     This function is used by _run and _validate. All options (pre_cmd and flags) should
     already be set.
@@ -119,19 +119,28 @@ def _stream_exec(
                 # Process terminated, read any remaining output
                 break
 
+    print(f"{stderr_lines=}")
+    print(f"{(stderr_lines==True)}")
+    print(f"{(stderr_lines==False)}")
     stderr = "".join(stderr_lines) if stderr_lines else None
+    print(f"{stderr=}")
+    print(f"{(stderr is None)=}")
+    print(f"{proc.returncode=}")
     if progress is not None:
         progress.close()
     if proc.returncode:
+        print("RETURNCODE!!!!")
         raise (ClippyValidationError(stderr) if validate else ClippyBackendError(stderr))
 
     if not d:
-        return None, stderr
+        return None, stderr, proc.returncode
     if stderr:
         logger.debug('Received stderr: %s', stderr)
+    if proc.returncode != 0:
+        logger.debug("Process returned %d", proc.returncode)
     logger.debug('run(): final stdout = %s', d)
 
-    return (d, stderr)
+    return (d, stderr, proc.returncode)
 
 
 def _validate(
@@ -148,8 +157,11 @@ def _validate(
     execcmd = cfg.get('validate_cmd_prefix').split() + cmd + [DRY_RUN_FLAG]
     logger.debug("Validating %s", cmd)
 
-    _, stderr = _stream_exec(execcmd, dct, logger, validate=True)
-    return stderr is not None, stderr or ''
+    _, stderr, retcode = _stream_exec(execcmd, dct, logger, validate=True)
+    print(f"in validate {stderr=}")
+    print(f"in validate {(stderr is not None)=}")
+    print(f"in validate: {retcode=}")
+    return retcode == 0, stderr or ""
 
 
 def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
@@ -164,7 +176,9 @@ def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
     logger.debug('Running %s', execcmd)
     # should we do something with stderr?
 
-    output, _ = _stream_exec(execcmd, dct, logger, validate=False)
+    output, _, retcode = _stream_exec(execcmd, dct, logger, validate=False)
+    if retcode != 0:
+        logger.warning("Process returned non-zero return code: %d", retcde)
     return output or {}
 
 
@@ -180,5 +194,5 @@ def _help(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict
     logger.debug('Running %s', execcmd)
     # should we do something with stderr?
 
-    output, _ = _stream_exec(execcmd, dct, logger, validate=True)
+    output, _, _ = _stream_exec(execcmd, dct, logger, validate=True)
     return output or {}
