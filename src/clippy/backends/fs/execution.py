@@ -5,6 +5,7 @@
 from __future__ import annotations
 import json
 import logging
+import select
 
 import subprocess
 from ...clippy_types import AnyDict
@@ -58,7 +59,8 @@ def _stream_exec(
     logger.debug("Calling %s with input %s", cmd, cmd_stdin)
 
     d = {}
-    stderr = None
+    stderr_lines = []
+
     with subprocess.Popen(
         cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8'
     ) as proc:
@@ -68,36 +70,56 @@ def _stream_exec(
 
         proc.stdin.write(cmd_stdin + "\n")
         proc.stdin.flush()
-        # proc.stdin.close()
-        it = iter(proc.stdout.readline, '')
-        progress = None
-        for line in it:
-            d = json.loads(line, object_hook=decode_clippy_json)
-            if proc.poll() is not None:  # process terminated; this shouldn't normally happen.
-                break
-            if _has_tqdm:
-                if progress is None:
-                    if PROGRESS_START_KEY in d:
-                        progress = tqdm() if d[PROGRESS_START_KEY] is None else tqdm(total=d[PROGRESS_START_KEY])
-                        # print(f"start, total = {d[PROGRESS_START_KEY]}, {progress.n=}")
-                else:
-                    if PROGRESS_INC_KEY in d:
-                        progress.update(d[PROGRESS_INC_KEY])
-                        progress.refresh()
-                        # print(f"update {progress.n=}")
-                    if PROGRESS_SET_KEY in d:
-                        progress.n = d[PROGRESS_SET_KEY]
-                        progress.refresh()
-                    if PROGRESS_END_KEY in d:
-                        progress.close()
-                        # print("close")
-                        progress = None
-            if progress is None:
-                if OUTPUT_KEY in d:
-                    print(d[OUTPUT_KEY])
+        proc.stdin.close()
 
-        if proc.stderr is not None:
-            stderr = "".join(proc.stderr.readlines())
+        progress = None
+        # Use select to read from both stdout and stderr
+        streams = [proc.stdout, proc.stderr]
+        while streams:
+            readable, _, _ = select.select(streams, [], [], 0.1)
+
+            for stream in readable:
+                line = stream.readline()
+                if not line:
+                    # Stream closed
+                    streams.remove(stream)
+                    continue
+
+                if stream == proc.stdout:
+                    d = json.loads(line, object_hook=decode_clippy_json)
+                    if _has_tqdm:
+                        if progress is None:
+                            if PROGRESS_START_KEY in d:
+                                progress = (
+                                    tqdm()
+                                    if d[PROGRESS_START_KEY] is None
+                                    else tqdm(total=d[PROGRESS_START_KEY])
+                                )
+                                # print(f"start, total = {d[PROGRESS_START_KEY]}, {progress.n=}")
+                        else:
+                            if PROGRESS_INC_KEY in d:
+                                progress.update(d[PROGRESS_INC_KEY])
+                                progress.refresh()
+                                # print(f"update {progress.n=}")
+                            if PROGRESS_SET_KEY in d:
+                                progress.n = d[PROGRESS_SET_KEY]
+                                progress.refresh()
+                            if PROGRESS_END_KEY in d:
+                                progress.close()
+                                # print("close")
+                                progress = None
+                    if progress is None:
+                        if OUTPUT_KEY in d:
+                            print(d[OUTPUT_KEY])
+                elif stream == proc.stderr:
+                    stderr_lines.append(line)
+                    print(line.rstrip(), flush=True)
+
+            if proc.poll() is not None:
+                # Process terminated, read any remaining output
+                break
+
+    stderr = "".join(stderr_lines) if stderr_lines else None
     if progress is not None:
         progress.close()
     if proc.returncode:
