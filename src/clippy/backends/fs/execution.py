@@ -168,7 +168,7 @@ def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
 
     output, _, retcode = _stream_exec(execcmd, dct, logger, validate=False)
     if retcode != 0:
-        logger.warning("Process returned non-zero return code: %d", retcde)
+        logger.warning("Process returned non-zero return code: %d", retcode)
     return output or {}
 
 
