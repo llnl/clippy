@@ -151,7 +151,29 @@ def _process_executable(executable: str, cls):
         raise ClippyConfigurationError("Invalid version information in " + executable)
 
     docstring = j.get(constants.DOCSTRING_KEY, "")
-    args = j.get(constants.ARGS_KEY, {})
+    args: dict[str, dict] = j.get(constants.ARGS_KEY, {})  # this is now a dict.
+
+    # Create a list of descriptions ordered by position (excluding position=-1)
+    ordered_descs = []
+    unordered_descs = []
+    for arg, arginfo in sorted(args.items(), key=lambda x: x[1]["position"]):
+        desc = f"{arg}: {arginfo['desc']}"
+        print(f"in arg loop, {desc=}")
+        if arginfo["position"] != -1:
+            ordered_descs.append(desc)
+        else:
+            desc += f", default: {arginfo['default_val']}"
+            unordered_descs.append(desc)
+
+    if ordered_descs != []:
+        docstring += "\nRequired Arguments:\n"
+        for desc in ordered_descs:
+            docstring += f"  {desc}\n"
+
+    if unordered_descs != []:
+        docstring += "\nOptional Arguments:\n"
+        for desc in unordered_descs:
+            docstring += f"  {desc}\n"
 
     # if we don't explicitly pass the method name, use the name of the exe.
     method = j.get(constants.METHODNAME_KEY, os.path.basename(executable))
@@ -159,15 +181,19 @@ def _process_executable(executable: str, cls):
         cls.logger.warning(
             f"Overwriting existing method {method} for class {cls} with executable {executable}"
         )
-
+    print(f"FINAL docstring for {method} {docstring=}")
     _define_method(cls, method, executable, docstring, args)
     return cls
 
 
 def _define_method(
-    cls, name: str, executable: str, docstr: str, arguments: list[str] | None
+    cls, name: str, executable: str, docstr: str, arguments: dict[str, dict] | None
 ):  # pylint: disable=too-complex
     """Defines a method on a given class."""
+    if arguments is None:
+        arguments = dict()
+
+    print(f" in define_method, {arguments=}")
 
     def m(self, *args, **kwargs):
         """
