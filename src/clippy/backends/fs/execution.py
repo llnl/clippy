@@ -106,7 +106,8 @@ def _stream_exec(
     if not d:
         return None, stderr
     if stderr:
-        logger.debug('Received stderr: %s', stderr)
+        print(stderr)
+        # logger.debug('Received stderr: %s', stderr)
     logger.debug('run(): final stdout = %s', d)
 
     return (d, stderr)
