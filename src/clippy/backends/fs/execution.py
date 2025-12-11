@@ -20,7 +20,6 @@ from .constants import (
     PROGRESS_END_KEY,
 )
 
-from ...error import ClippyValidationError, ClippyBackendError
 from ..serialization import encode_clippy_json, decode_clippy_json
 
 try:
