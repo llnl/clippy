@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import logging
 import select
+import os
 
 import subprocess
 from ...clippy_types import AnyDict
@@ -72,52 +73,66 @@ def _stream_exec(
         proc.stdin.close()
 
         progress = None
-        # Use select to read from both stdout and stderr
-        streams = [proc.stdout, proc.stderr]
-        while streams:
-            readable, _, _ = select.select(streams, [], [], 0.1)
+        # Use select with file descriptors and non-blocking reads
+        stdout_fd = proc.stdout.fileno()
+        stderr_fd = proc.stderr.fileno()
+        fds = [stdout_fd, stderr_fd]
 
-            for stream in readable:
-                line = stream.readline()
-                if not line:
+        # Set non-blocking mode
+        os.set_blocking(stdout_fd, False)
+        os.set_blocking(stderr_fd, False)
+
+        # Line buffers for partial reads
+        stdout_buffer = ""
+        stderr_buffer = ""
+
+        while fds or proc.poll() is None:
+            # Only select if we have fds to monitor
+            if fds:
+                readable, _, _ = select.select(fds, [], [], 0.1)
+            else:
+                readable = []
+
+            for fd in readable:
+                try:
+                    chunk = os.read(fd, 4096)
+                    if not chunk:
+                        # Stream closed (EOF)
+                        fds.remove(fd)
+                        continue
+
+                    text = chunk.decode("utf-8")
+
+                    if fd == stdout_fd:
+                        stdout_buffer += text
+                        while "\n" in stdout_buffer:
+                            line, stdout_buffer = stdout_buffer.split("\n", 1)
+                            d = json.loads(line, object_hook=decode_clippy_json)
+                    elif fd == stderr_fd:
+                        stderr_buffer += text
+                        while "\n" in stderr_buffer:
+                            line, stderr_buffer = stderr_buffer.split("\n", 1)
+                            stderr_lines.append(line + "\n")
+                            print(line, flush=True)
+                except BlockingIOError:
+                    # No data available right now
+                    continue
+                except OSError:
                     # Stream closed
-                    streams.remove(stream)
+                    if fd in fds:
+                        fds.remove(fd)
                     continue
 
-                if stream == proc.stdout:
-                    d = json.loads(line, object_hook=decode_clippy_json)
-                    if _has_tqdm:
-                        if progress is None:
-                            if PROGRESS_START_KEY in d:
-                                progress = (
-                                    tqdm()
-                                    if d[PROGRESS_START_KEY] is None
-                                    else tqdm(total=d[PROGRESS_START_KEY])
-                                )
-                                # print(f"start, total = {d[PROGRESS_START_KEY]}, {progress.n=}")
-                        else:
-                            if PROGRESS_INC_KEY in d:
-                                progress.update(d[PROGRESS_INC_KEY])
-                                progress.refresh()
-                                # print(f"update {progress.n=}")
-                            if PROGRESS_SET_KEY in d:
-                                progress.n = d[PROGRESS_SET_KEY]
-                                progress.refresh()
-                            if PROGRESS_END_KEY in d:
-                                progress.close()
-                                # print("close")
-                                progress = None
-                    if progress is None:
-                        if OUTPUT_KEY in d:
-                            print(d[OUTPUT_KEY])
-                elif stream == proc.stderr:
-                    stderr_lines.append(line)
-                    print(line.rstrip(), flush=True)
+        # Process any remaining buffered data
+        if stdout_buffer.strip():
+            try:
+                d = json.loads(stdout_buffer, object_hook=decode_clippy_json)
+            except json.JSONDecodeError:
+                pass
 
-            # Don't break when process ends - continue reading until streams close
-            # if proc.poll() is not None:
-            #     # Process terminated, read any remaining output
-            #     break
+        if stderr_buffer.strip():
+            stderr_lines.append(stderr_buffer)
+            print(stderr_buffer.rstrip(), flush=True)
 
     stderr = "".join(stderr_lines) if stderr_lines else None
     if progress is not None:
