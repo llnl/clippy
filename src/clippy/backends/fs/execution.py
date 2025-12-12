@@ -114,9 +114,10 @@ def _stream_exec(
                     stderr_lines.append(line)
                     print(line.rstrip(), flush=True)
 
-            if proc.poll() is not None:
-                # Process terminated, read any remaining output
-                break
+            # Don't break when process ends - continue reading until streams close
+            # if proc.poll() is not None:
+            #     # Process terminated, read any remaining output
+            #     break
 
     stderr = "".join(stderr_lines) if stderr_lines else None
     if progress is not None:
