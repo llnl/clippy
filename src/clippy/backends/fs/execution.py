@@ -23,13 +23,6 @@ from .constants import (
 
 from ..serialization import encode_clippy_json, decode_clippy_json
 
-try:
-    from tqdm import tqdm
-
-    _has_tqdm = True
-except ImportError:
-    _has_tqdm = False
-
 
 def _stream_exec(
     cmd: list[str],
