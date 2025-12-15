@@ -1,2 +1,2 @@
 semver >= 3.0
-jsonlogic-py >= 0.1
+jsonlogic-py >= 0.2
