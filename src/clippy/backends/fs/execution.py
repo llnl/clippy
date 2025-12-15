@@ -11,14 +11,7 @@ import os
 import subprocess
 from ...clippy_types import AnyDict
 from ... import cfg
-from .constants import (
-    DRY_RUN_FLAG,
-    HELP_FLAG,
-    PROGRESS_INC_KEY,
-    PROGRESS_SET_KEY,
-    PROGRESS_START_KEY,
-    PROGRESS_END_KEY,
-)
+from .constants import DRY_RUN_FLAG, HELP_FLAG
 
 from ..serialization import encode_clippy_json, decode_clippy_json
 
