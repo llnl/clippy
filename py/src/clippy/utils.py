@@ -3,8 +3,8 @@
 """
 
 from .clippy_types import AnyDict
-from .error import ClippyInvalidSelectorError
 from .constants import SELECTOR_KEY
+from .error import ClippyInvalidSelectorError
 
 
 def flat_dict_to_nested(input_dict: AnyDict) -> AnyDict:

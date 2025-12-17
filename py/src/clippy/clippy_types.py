@@ -7,7 +7,8 @@ Defines types and classes for Clippy.
 """
 
 import os
-from typing import Any, Optional
+from typing import Any
+
 from .error import ClippyConfigurationError
 
 # AnyDict is a convenience type so we can find places
@@ -15,7 +16,7 @@ from .error import ClippyConfigurationError
 AnyDict = dict[str, Any]
 
 # CONFIG_ENTRY is a convenience type for use in CLIPPY_CONFIG.
-CONFIG_ENTRY = tuple[Optional[str], Any]
+CONFIG_ENTRY = tuple[str | None, Any]
 
 
 # CLIPPY_CONFIG holds configuration items for both

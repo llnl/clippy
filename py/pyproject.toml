@@ -31,3 +31,15 @@ optional-dependencies = {dev = {file = ["requirements-dev.txt"] }}
 [project.urls]
 Homepage = "https://github.com/LLNL/clippy"
 Issues = "https://github.com/LLNL/clippy/issues"
+
+[tool.mypy]
+exclude = [
+    "^build/",
+    "attic/",
+    "^venv/",
+    "^tests/",
+]
+
+[tool.ruff]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+line-length = 120

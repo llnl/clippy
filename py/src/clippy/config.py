@@ -4,6 +4,7 @@
 # The format is config_key: (environment variable or None, default value)
 
 import logging
+
 from .clippy_types import CONFIG_ENTRY
 
 _clippy_cfg: dict[str, CONFIG_ENTRY] = {

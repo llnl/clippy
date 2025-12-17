@@ -3,17 +3,18 @@
 """
 
 from __future__ import annotations
+
+import contextlib
 import json
 import logging
-import select
 import os
-
+import select
 import subprocess
-from ...clippy_types import AnyDict
-from ... import cfg
-from .constants import DRY_RUN_FLAG, HELP_FLAG
 
-from ..serialization import encode_clippy_json, decode_clippy_json
+from ... import cfg
+from ...clippy_types import AnyDict
+from ..serialization import decode_clippy_json, encode_clippy_json
+from .constants import DRY_RUN_FLAG, HELP_FLAG
 
 
 def _stream_exec(
@@ -110,10 +111,8 @@ def _stream_exec(
 
         # Process any remaining buffered data
         if stdout_buffer.strip():
-            try:
+            with contextlib.suppress(json.JSONDecodeError):
                 d = json.loads(stdout_buffer, object_hook=decode_clippy_json)
-            except json.JSONDecodeError:
-                pass
 
         if stderr_buffer.strip():
             stderr_lines.append(stderr_buffer)

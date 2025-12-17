@@ -3,9 +3,11 @@ Functions to check versions. Requires semver.
 """
 
 from __future__ import annotations
+
 from semver import Version
-from ..clippy_types import AnyDict
+
 from .. import cfg
+from ..clippy_types import AnyDict
 
 
 def _check_version(output_dict: AnyDict | None) -> bool:

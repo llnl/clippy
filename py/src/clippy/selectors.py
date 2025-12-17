@@ -1,6 +1,7 @@
 """Custom selectors for clippy."""
 
 from __future__ import annotations
+
 import jsonlogic as jl
 
 from . import constants
@@ -37,7 +38,7 @@ class Selector(jl.Variable):
 
     def describe(self):
         hier = self.hierarchy()
-        maxlen = max((len(sub_desc[0]) for sub_desc in hier))
+        maxlen = max(len(sub_desc[0]) for sub_desc in hier)
         return "\n".join(
             f"{sub_desc[0]:<{maxlen+2}} {sub_desc[1]}" for sub_desc in hier
         )

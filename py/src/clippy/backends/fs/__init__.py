@@ -2,32 +2,29 @@
 
 from __future__ import annotations
 
-import os
-import stat
 import json
-import sys
-import pathlib
 import logging
+import os
+import pathlib
+import stat
+import sys
 from subprocess import CalledProcessError
 from typing import Any
 
-
-from .execution import _validate, _run, _help
-from ..version import _check_version
-from ..serialization import ClippySerializable
-
-from ... import constants
+from ... import constants as clippy_constants
+from ...clippy_types import CLIPPY_CONFIG
 from ...error import (
     ClippyConfigurationError,
+    ClippyInvalidSelectorError,
     ClippyTypeError,
     ClippyValidationError,
-    ClippyInvalidSelectorError,
 )
 from ...selectors import Selector
 from ...utils import flat_dict_to_nested
-
-from ...clippy_types import CLIPPY_CONFIG
+from ..serialization import ClippySerializable
+from ..version import _check_version
 from .config import _fs_config_entries
+from .execution import _help, _run, _validate
 
 # create a fs-specific configuration.
 cfg = CLIPPY_CONFIG(_fs_config_entries)
@@ -46,10 +43,10 @@ def _is_user_executable(path: pathlib.Path) -> bool:
     gid = os.getgid()
 
     # Owner permissions
-    if st.st_uid == uid and mode & stat.S_IXUSR:
+    if st.st_uid == uid and mode & stat.S_IXUSR:  # noqa: SIM114
         return True
     # Group permissions
-    elif st.st_gid == gid and mode & stat.S_IXGRP:
+    elif st.st_gid == gid and mode & stat.S_IXGRP:  # noqa: SIM114
         return True
     # Other permissions
     elif mode & stat.S_IXOTH:
@@ -93,13 +90,13 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
     a meta.json file in each class directory. The meta.json
     file typically holds the class's docstring and any initial
     top-level selectors as a dictionary of selector: docstring."""
-    metafile = pathlib.Path(path, name, constants.CLASS_META_FILE)
+    metafile = pathlib.Path(path, name, clippy_constants.CLASS_META_FILE)
     meta = {}
     if metafile.exists():
-        with open(metafile, "r", encoding="utf-8") as json_file:
+        with open(metafile, encoding="utf-8") as json_file:
             meta = json.load(json_file)
     # pull the selectors out since we don't want them in the class definition right now
-    selectors = meta.pop(constants.INITIAL_SELECTOR_KEY, {})
+    selectors = meta.pop(clippy_constants.INITIAL_SELECTOR_KEY, {})
     meta["_name"] = name
     meta["_path"] = path
     meta["_cfg"] = topcfg
@@ -144,14 +141,14 @@ def _process_executable(executable: str, cls):
 
     # check to make sure we have the method name. This is so the executable can have
     # a different name than the actual method.
-    if constants.METHODNAME_KEY not in j:
+    if clippy_constants.METHODNAME_KEY not in j:
         raise ClippyConfigurationError("No method_name in " + executable)
     # check version
     if not _check_version(j):
         raise ClippyConfigurationError("Invalid version information in " + executable)
 
-    docstring = j.get(constants.DOCSTRING_KEY, "")
-    args: dict[str, dict] = j.get(constants.ARGS_KEY, {})  # this is now a dict.
+    docstring = j.get(clippy_constants.DOCSTRING_KEY, "")
+    args: dict[str, dict] = j.get(clippy_constants.ARGS_KEY, {})  # this is now a dict.
 
     # Create a list of descriptions ordered by position (excluding position=-1)
     ordered_descs = []
@@ -175,7 +172,7 @@ def _process_executable(executable: str, cls):
             docstring += f"  {desc}\n"
 
     # if we don't explicitly pass the method name, use the name of the exe.
-    method = j.get(constants.METHODNAME_KEY, os.path.basename(executable))
+    method = j.get(clippy_constants.METHODNAME_KEY, os.path.basename(executable))
     if hasattr(cls, method) and not method.startswith("__"):
         cls.logger.warning(
             f"Overwriting existing method {method} for class {cls} with executable {executable}"
@@ -189,7 +186,7 @@ def _define_method(
 ):  # pylint: disable=too-complex
     """Defines a method on a given class."""
     if arguments is None:
-        arguments = dict()
+        arguments = {}
 
     def m(self, *args, **kwargs):
         """
@@ -208,7 +205,7 @@ def _define_method(
 
         # .. add state
         # argdict[STATE_KEY] = self._state
-        argdict[constants.STATE_KEY] = getattr(self, constants.STATE_KEY)
+        argdict[clippy_constants.STATE_KEY] = getattr(self, clippy_constants.STATE_KEY)
         # ~ for key in statedesc:
         #     ~ statej[key] = getattr(self, key)
 
@@ -216,8 +213,7 @@ def _define_method(
         numpositionals = len(args)
         for argdesc in arguments:
             value = arguments[argdesc]
-            if "position" in value:
-                if 0 <= value["position"] < numpositionals:
+            if 0 <= value.get("position", -1) < numpositionals:
                     argdict[argdesc] = args[value["position"]]
 
         # .. add keyword arguments
@@ -235,7 +231,7 @@ def _define_method(
         # kwargs, let's update the kwarg references. Works
         # for lists and dicts only.
         for kw, kwval in kwargs.items():
-            if kw in outj.get(constants.REFERENCE_KEY, {}):
+            if kw in outj.get(clippy_constants.REFERENCE_KEY, {}):
                 kwval.clear()
                 if isinstance(kwval, dict):
                     kwval.update(outj[kw])
@@ -245,15 +241,15 @@ def _define_method(
                     raise ClippyTypeError()
 
         # dump any output
-        if constants.OUTPUT_KEY in outj:
-            print(outj[constants.OUTPUT_KEY])
+        if clippy_constants.OUTPUT_KEY in outj:
+            print(outj[clippy_constants.OUTPUT_KEY])
         # update state according to json output
-        if constants.STATE_KEY in outj:
-            setattr(self, constants.STATE_KEY, outj[constants.STATE_KEY])
+        if clippy_constants.STATE_KEY in outj:
+            setattr(self, clippy_constants.STATE_KEY, outj[clippy_constants.STATE_KEY])
 
         # update selectors if necessary.
-        if constants.SELECTOR_KEY in outj:
-            d = flat_dict_to_nested(outj[constants.SELECTOR_KEY])
+        if clippy_constants.SELECTOR_KEY in outj:
+            d = flat_dict_to_nested(outj[clippy_constants.SELECTOR_KEY])
             for topsel, subsels in d.items():
                 if not hasattr(self, topsel):
                     raise ClippyInvalidSelectorError(
@@ -262,9 +258,9 @@ def _define_method(
                 getattr(self, topsel)._import_from_dict(subsels)
 
         # return result
-        if outj.get(constants.SELF_KEY, False):
+        if outj.get(clippy_constants.SELF_KEY, False):
             return self
-        return outj.get(constants.RETURN_KEY)
+        return outj.get(clippy_constants.RETURN_KEY)
 
         # end of nested def m
 

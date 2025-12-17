@@ -3,12 +3,14 @@ Clippy serialization functions and classes.
 """
 
 from __future__ import annotations
-import jsonlogic as jl
+
 from typing import Any
-from ..error import ClippySerializationError
+
+import jsonlogic as jl
+
 from .. import _dynamic_types
 from ..clippy_types import AnyDict
-
+from ..error import ClippySerializationError
 
 # TODO: SAB 20240204 complete typing here.
 

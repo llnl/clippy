@@ -1,7 +1,5 @@
 coverage
-flake8
+ruff
 mypy
-pylint
-pyproj
 pytest
 json-logic-qubit
