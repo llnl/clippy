@@ -5,11 +5,11 @@
 # Create the logger
 from __future__ import annotations
 
-import logging
 import importlib
-from .config import _clippy_cfg
-from .clippy_types import AnyDict, CLIPPY_CONFIG
+import logging
 
+from .clippy_types import CLIPPY_CONFIG, AnyDict
+from .config import _clippy_cfg
 
 # Create the main configuraton object and expose it globally.
 cfg = CLIPPY_CONFIG(_clippy_cfg)

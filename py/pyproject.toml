@@ -41,5 +41,5 @@ exclude = [
 ]
 
 [tool.ruff]
-select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
+lint.select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 line-length = 120
