@@ -158,7 +158,6 @@ def _process_executable(executable: str, cls):
     unordered_descs = []
     for arg, arginfo in sorted(args.items(), key=lambda x: x[1]["position"]):
         desc = f"{arg}: {arginfo['desc']}"
-        print(f"in arg loop, {desc=}")
         if arginfo["position"] != -1:
             ordered_descs.append(desc)
         else:
@@ -181,7 +180,6 @@ def _process_executable(executable: str, cls):
         cls.logger.warning(
             f"Overwriting existing method {method} for class {cls} with executable {executable}"
         )
-    print(f"FINAL docstring for {method} {docstring=}")
     _define_method(cls, method, executable, docstring, args)
     return cls
 
@@ -192,8 +190,6 @@ def _define_method(
     """Defines a method on a given class."""
     if arguments is None:
         arguments = dict()
-
-    print(f" in define_method, {arguments=}")
 
     def m(self, *args, **kwargs):
         """

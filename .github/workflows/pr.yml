@@ -56,7 +56,7 @@ jobs:
           TMPDIR=$(mktemp -d)
           git clone https://github.com/LLNL/clippy-cpp --branch ${{ github.head_ref }} $TMPDIR || git clone https://github.com/LLNL/clippy-cpp --branch master $TMPDIR
           mkdir -p $TMPDIR/build
-          cd $TMPDIR/build && cmake -DBOOST_ROOT=$BOOST_ROOT .. && make 
+          cd $TMPDIR/build && cmake -DMODERN_CMAKE_BUILD_TESTING=ON  -DBUILD_TESTING=ON -DBOOST_ROOT=$BOOST_ROOT .. && make 
           ls -l $TMPDIR/build/test
           BACKEND=$TMPDIR/build/test
           echo "BACKEND=$BACKEND" >> $GITHUB_ENV
