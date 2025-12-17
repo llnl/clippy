@@ -7,3 +7,5 @@ setup.cfg
 .vscode
 *.egg-info
 .coverage
+*.tgz
+**/attic
