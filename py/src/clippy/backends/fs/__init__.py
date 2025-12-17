@@ -174,16 +174,12 @@ def _process_executable(executable: str, cls):
     # if we don't explicitly pass the method name, use the name of the exe.
     method = j.get(clippy_constants.METHODNAME_KEY, os.path.basename(executable))
     if hasattr(cls, method) and not method.startswith("__"):
-        cls.logger.warning(
-            f"Overwriting existing method {method} for class {cls} with executable {executable}"
-        )
+        cls.logger.warning(f"Overwriting existing method {method} for class {cls} with executable {executable}")
     _define_method(cls, method, executable, docstring, args)
     return cls
 
 
-def _define_method(
-    cls, name: str, executable: str, docstr: str, arguments: dict[str, dict] | None
-):  # pylint: disable=too-complex
+def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict[str, dict] | None):  # pylint: disable=too-complex
     """Defines a method on a given class."""
     if arguments is None:
         arguments = {}
@@ -214,7 +210,7 @@ def _define_method(
         for argdesc in arguments:
             value = arguments[argdesc]
             if 0 <= value.get("position", -1) < numpositionals:
-                    argdict[argdesc] = args[value["position"]]
+                argdict[argdesc] = args[value["position"]]
 
         # .. add keyword arguments
         argdict.update(kwargs)
@@ -252,9 +248,7 @@ def _define_method(
             d = flat_dict_to_nested(outj[clippy_constants.SELECTOR_KEY])
             for topsel, subsels in d.items():
                 if not hasattr(self, topsel):
-                    raise ClippyInvalidSelectorError(
-                        f"selector {topsel} not found in class; aborting"
-                    )
+                    raise ClippyInvalidSelectorError(f"selector {topsel} not found in class; aborting")
                 getattr(self, topsel)._import_from_dict(subsels)
 
         # return result

@@ -1,5 +1,5 @@
 # pylint: disable=consider-using-namedtuple-or-dataclass
-''' This holds a dictionary containing global configuration variables for clippy.'''
+"""This holds a dictionary containing global configuration variables for clippy."""
 
 # The format is config_key: (environment variable or None, default value)
 

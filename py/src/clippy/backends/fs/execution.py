@@ -1,5 +1,5 @@
 """
-    Functions to execute backend programs.
+Functions to execute backend programs.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ def _stream_exec(
     already be set.
     """
 
-    logger.debug(f'Submission = {submission_dict}')
+    logger.debug(f"Submission = {submission_dict}")
     # PP support passing objects
     # ~ cmd_stdin = json.dumps(submission_dict)
     cmd_stdin = json.dumps(submission_dict, default=encode_clippy_json)
@@ -48,7 +48,7 @@ def _stream_exec(
     stderr_lines = []
 
     with subprocess.Popen(
-        cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf8'
+        cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf8"
     ) as proc:
         assert proc.stdin is not None
         assert proc.stdout is not None
@@ -127,26 +127,24 @@ def _stream_exec(
     if not d:
         return None, stderr, proc.returncode
     if stderr:
-        logger.debug('Received stderr: %s', stderr)
+        logger.debug("Received stderr: %s", stderr)
     if proc.returncode != 0:
         logger.debug("Process returned %d", proc.returncode)
-    logger.debug('run(): final stdout = %s', d)
+    logger.debug("run(): final stdout = %s", d)
 
     return (d, stderr, proc.returncode)
 
 
-def _validate(
-    cmd: str | list[str], dct: AnyDict, logger: logging.Logger
-) -> tuple[bool, str]:
-    '''
+def _validate(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> tuple[bool, str]:
+    """
     Converts the dictionary dct into a json file and calls executable cmd with the DRY_RUN_FLAG.
     Returns True/False (validation successful) and any stderr.
-    '''
+    """
 
     if isinstance(cmd, str):
         cmd = [cmd]
 
-    execcmd = cfg.get('validate_cmd_prefix').split() + cmd + [DRY_RUN_FLAG]
+    execcmd = cfg.get("validate_cmd_prefix").split() + cmd + [DRY_RUN_FLAG]
     logger.debug("Validating %s", cmd)
 
     _, stderr, retcode = _stream_exec(execcmd, dct, logger, validate=True)
@@ -154,15 +152,15 @@ def _validate(
 
 
 def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
-    '''
+    """
     converts the dictionary dct into a json file and calls executable cmd. Prepends
     cmd_prefix configuration, if any.
-    '''
+    """
 
     if isinstance(cmd, str):
         cmd = [cmd]
-    execcmd = cfg.get('cmd_prefix').split() + cmd
-    logger.debug('Running %s', execcmd)
+    execcmd = cfg.get("cmd_prefix").split() + cmd
+    logger.debug("Running %s", execcmd)
     # should we do something with stderr?
 
     output, _, retcode = _stream_exec(execcmd, dct, logger, validate=False)
@@ -172,15 +170,15 @@ def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
 
 
 def _help(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
-    '''
+    """
     Retrieves the help output from the clippy command. Prepends validate_cmd_prefix
     if set and appends HELP_FLAG.
     Unlike `_validate()`, does not append DRY_RUN_FLAG, and returns the output.
-    '''
+    """
     if isinstance(cmd, str):
         cmd = [cmd]
-    execcmd = cfg.get('validate_cmd_prefix').split() + cmd + [HELP_FLAG]
-    logger.debug('Running %s', execcmd)
+    execcmd = cfg.get("validate_cmd_prefix").split() + cmd + [HELP_FLAG]
+    logger.debug("Running %s", execcmd)
     # should we do something with stderr?
 
     output, _, _ = _stream_exec(execcmd, dct, logger, validate=True)

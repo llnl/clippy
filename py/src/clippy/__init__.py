@@ -1,4 +1,4 @@
-""" This is the clippy initialization file. """
+"""This is the clippy initialization file."""
 
 # The general flow is as follows:
 # Create the configurations (see comments in .config for details)
@@ -27,15 +27,15 @@ logger.setLevel(cfg.get("loglevel"))
 
 
 def load_classes():
-    '''For each listed backend, import the module of the same name. The
+    """For each listed backend, import the module of the same name. The
     backend should expose two functions: a classes() function that returns
     a dictionary of classes keyed by name, and a get_cfg() function that
     returns a CLIPPY_CONFIG object with backend-specific configuration.
     This object is then made an attribute of the global configuration
     (i.e., `cfg.fs.get('fs_specific_config')`).
-    '''
+    """
     for backend in cfg.get("backends"):
-        b = importlib.import_module(f'.backends.{backend}', package=__name__)
+        b = importlib.import_module(f".backends.{backend}", package=__name__)
         setattr(cfg, backend, b.get_cfg())
         for name, c in b.classes().items():
             # backend_config = importlib.import_module(f".backends.{name}.config.{name}_config")

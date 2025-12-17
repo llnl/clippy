@@ -12,14 +12,10 @@ class Selector(jl.Variable):
     """A Selector represents a single variable."""
 
     def __init__(self, parent: Selector | None, name: str, docstr: str):
-        super().__init__(
-            name, docstr
-        )  # op and o2 are None to represent this as a variable.
+        super().__init__(name, docstr)  # op and o2 are None to represent this as a variable.
         self.parent = parent
         self.name = name
-        self.fullname: str = (
-            self.name if self.parent is None else f"{self.parent.fullname}.{self.name}"
-        )
+        self.fullname: str = self.name if self.parent is None else f"{self.parent.fullname}.{self.name}"
         self.subselectors: set[Selector] = set()
 
     def __hash__(self):
@@ -39,9 +35,7 @@ class Selector(jl.Variable):
     def describe(self):
         hier = self.hierarchy()
         maxlen = max(len(sub_desc[0]) for sub_desc in hier)
-        return "\n".join(
-            f"{sub_desc[0]:<{maxlen+2}} {sub_desc[1]}" for sub_desc in hier
-        )
+        return "\n".join(f"{sub_desc[0]:<{maxlen + 2}} {sub_desc[1]}" for sub_desc in hier)
 
     def __str__(self):
         return repr(self.prepare())

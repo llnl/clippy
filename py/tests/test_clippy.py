@@ -43,7 +43,6 @@ def test_imports():
 
 
 def test_bag(testbag):
-
     testbag.insert(41)
     assert testbag.size() == 1
     testbag.insert(42)
@@ -191,9 +190,9 @@ def test_selectors(testsel):
 
 
 def test_graph(testgraph):
-    testgraph.add_edge("a", "b").add_edge("b", "c").add_edge("a", "c").add_edge(
-        "c", "d"
-    ).add_edge("d", "e").add_edge("e", "f").add_edge("f", "g").add_edge("e", "g")
+    testgraph.add_edge("a", "b").add_edge("b", "c").add_edge("a", "c").add_edge("c", "d").add_edge("d", "e").add_edge(
+        "e", "f"
+    ).add_edge("f", "g").add_edge("e", "g")
 
     assert testgraph.nv() == 7
     assert testgraph.ne() == 8
