@@ -1,0 +1,7 @@
+{
+  "__doc__" : "For testing selectors",
+  "initial_selectors" : {
+    "nodes" : "Top level for nodes",
+    "edges" : "Top level for edges"
+  }
+}
