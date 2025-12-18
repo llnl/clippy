@@ -6,8 +6,8 @@
 		"dockerfile": "Dockerfile"
 	},
 	"containerEnv": {
-    	"CLIPPY_BACKEND_PATH": "${containerWorkspaceFolder}/build/test"
-  	},
+		"CLIPPY_BACKEND_PATH": "${containerWorkspaceFolder}/build/test"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -17,5 +17,5 @@
 			]
 		}
 	},
-	"postCreateCommand": "pip install --break-system-packages -r  ${containerWorkspaceFolder}/test/requirements.txt"
+	//"postCreateCommand": "pip install --break-system-packages -r  ${containerWorkspaceFolder}/test/requirements.txt"
 }
