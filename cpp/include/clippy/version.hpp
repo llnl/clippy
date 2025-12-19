@@ -1,0 +1,6 @@
+#pragma once
+
+#define CLIPPY_VERSION_MAJOR 0
+#define CLIPPY_VERSION_MINOR 5
+#define CLIPPY_VERSION_PATCH 0
+#define CLIPPY_VERSION_NAME "0.5.0"

@@ -1,9 +1,10 @@
 __pycache__
 **/build
 venv
-*.core
-build
 setup.cfg
 .vscode
 *.egg-info
 .coverage
+**/attic
+build
+*/.cache

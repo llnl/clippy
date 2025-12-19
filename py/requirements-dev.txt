@@ -1,0 +1,5 @@
+coverage
+ruff
+mypy
+pytest
+json-logic-qubit
