@@ -93,7 +93,7 @@ option(TEST_WITH_SLURM "Run tests with Slurm" OFF)
 # Testing & examples are only available if this is the main app
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     message(STATUS "adding test subdir")
-    add_subdirectory(test)
+    add_subdirectory(examples)
     # Example codes are here.
     #add_subdirectory(examples)
 endif()

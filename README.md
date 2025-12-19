@@ -60,7 +60,7 @@ In [1]: from clippy import *
     │╰─╯│
     ╰───╯
 
-In [2]: c = ClippyBag()  # creates a bag datastructure.
+In [2]: c = ExampleBag()  # creates a bag datastructure.
 
 In [3]: c.insert("foo").insert("bar")  # mutating methods can be chained
        
