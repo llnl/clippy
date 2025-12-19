@@ -1,0 +1,21 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
+{
+	"name": "C++",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"containerEnv": {
+		"CLIPPY_BACKEND_PATH": "${containerWorkspaceFolder}/build/test"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"llvm-vs-code-extensions.vscode-clangd",
+				"ms-python.python"
+				// add other extensions as needed
+			]
+		}
+	},
+	//"postCreateCommand": "pip install --break-system-packages -r  ${containerWorkspaceFolder}/test/requirements.txt"
+}

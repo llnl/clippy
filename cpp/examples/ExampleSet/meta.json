@@ -1,0 +1,6 @@
+{
+  "__doc__" : "A set data structure",
+  "initial_selectors" : {
+    "value" : "A value in the container"
+  }
+}
