@@ -38,9 +38,16 @@ def testsel():
 def examplegraph():
     return clippy.ExampleGraph()
 
+@pytest.fixture()
+def simpleexamples():
+    return clippy.SimpleExamples()
+
 
 def test_imports():
     assert "ExampleBag" in clippy.__dict__
+
+def test_simple_examples(simpleexamples):
+    assert simpleexamples.howdy("Seth") == "Howdy, Seth"
 
 
 def test_bag(examplebag):
