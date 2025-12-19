@@ -16,6 +16,11 @@ from ...clippy_types import AnyDict
 from ..serialization import decode_clippy_json, encode_clippy_json
 from .constants import DRY_RUN_FLAG, HELP_FLAG
 
+class NonZeroReturnCodeError(Exception):
+    def __init__(self, execcmd, return_code, extramsg, message="returned non-zero exit code"):
+        self.return_code = return_code
+        self.execcmd = execcmd
+        super().__init__(f"{execcmd} {message}: {return_code}\n{extramsg}")
 
 def _stream_exec(
     cmd: list[str],
@@ -163,9 +168,9 @@ def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
     logger.debug("Running %s", execcmd)
     # should we do something with stderr?
 
-    output, _, retcode = _stream_exec(execcmd, dct, logger, validate=False)
+    output, stderr, retcode = _stream_exec(execcmd, dct, logger, validate=False)
     if retcode != 0:
-        logger.warning("Process returned non-zero return code: %d", retcode)
+        raise NonZeroReturnCodeError(execcmd, retcode, stderr)
     return output or {}
 
 

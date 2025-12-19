@@ -24,7 +24,7 @@ from ...utils import flat_dict_to_nested
 from ..serialization import ClippySerializable
 from ..version import _check_version
 from .config import _fs_config_entries
-from .execution import _help, _run, _validate
+from .execution import _help, _run, _validate, NonZeroReturnCodeError
 
 # create a fs-specific configuration.
 cfg = CLIPPY_CONFIG(_fs_config_entries)
@@ -221,6 +221,7 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
             raise ClippyValidationError(stderr)
 
         # call executable and create json output
+        
         outj = _run(executable, argdict, self.logger)
 
         # if we have results that have keys that are in our

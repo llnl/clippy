@@ -6,7 +6,7 @@ sys.path.append("src")
 import jsonlogic as jl
 import clippy
 from clippy.error import ClippyValidationError, ClippyInvalidSelectorError
-
+from clippy.backends.fs.execution import NonZeroReturnCodeError
 import logging
 
 clippy.logger.setLevel(logging.WARN)
@@ -141,6 +141,11 @@ def test_expression_mod(examplebag):
 
 def test_clippy_returns_int(examplefunction):
     assert examplefunction.returns_int() == 42
+
+
+def test_clippy_throws(examplefunction):
+    with pytest.raises(NonZeroReturnCodeError, match="I'm Grumpy!"):
+        examplefunction.throws_error()
 
 
 def test_clippy_returns_string(examplefunction):
