@@ -22,12 +22,14 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 py/src/clippy --count --show-source --statistics --max-line-length=120
+          cd py
+          ruff check src/clippy --output-format=concise --statistics --line-length=120
 
 
       - name: MyPy
         run: |
-          mypy py/src/clippy --ignore-missing-imports
+          cd py
+          mypy src/clippy --ignore-missing-imports
 
       - name: Install Boost
         uses: MarkusJx/install-boost@v2.4.5
