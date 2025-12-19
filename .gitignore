@@ -8,3 +8,4 @@ setup.cfg
 **/attic
 build
 */.cache
+.cache/
