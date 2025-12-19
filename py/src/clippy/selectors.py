@@ -7,7 +7,6 @@ import jsonlogic as jl
 from . import constants
 from .clippy_types import AnyDict
 
-
 class Selector(jl.Variable):
     """A Selector represents a single variable."""
 
