@@ -26,7 +26,6 @@ static const boost::json::object always_true_obj =
     boost::json::parse(always_true).as_object();
 
 int main(int argc, char **argv) {
-  std::cerr << "starting" << std::endl;
   clippy::clippy clip{method_name, "returns a map of key: value "
                                    "corresponding to the selector."};
   clip.add_required<selector>("selector",
