@@ -6,7 +6,7 @@
 #include <clippy/clippy.hpp>
 
 int main(int argc, char **argv) {
-  clippy::clippy clip("grumpy", "Always throws errors because he's Grumpy!");
+  clippy::clippy clip("throws_error", "Always throws errors");
   if (clip.parse(argc, argv)) {
     return 0;
   }

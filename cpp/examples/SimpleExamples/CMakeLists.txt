@@ -1,7 +1,0 @@
-add_test(SimpleExamples grumpy)
-add_test(SimpleExamples howdy)
-add_test(SimpleExamples return_tuple)
-add_test(SimpleExamples sort_edges)
-add_test(SimpleExamples sort_string_edges)
-add_test(SimpleExamples sort_strings)
-add_test(SimpleExamples sum)

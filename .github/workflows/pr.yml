@@ -20,7 +20,7 @@ jobs:
           if [ -f py/requirements.txt ]; then pip install -r py/requirements.txt; fi
           if [ -f py/requirements-dev.txt ]; then pip install -r py/requirements-dev.txt; fi
 
-      - name: Lint with flake8
+      - name: Lint with ruff
         run: |
           cd py
           ruff check src/clippy --output-format=concise --statistics --line-length=120
