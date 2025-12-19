@@ -17,17 +17,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          if [ -f py/requirements.txt ]; then pip install -r py/requirements.txt; fi
+          if [ -f py/requirements-dev.txt ]; then pip install -r py/requirements-dev.txt; fi
 
       - name: Lint with flake8
         run: |
-          flake8 src/clippy --count --show-source --statistics --max-line-length=120
+          flake8 py/src/clippy --count --show-source --statistics --max-line-length=120
 
 
       - name: MyPy
         run: |
-          mypy src/clippy --ignore-missing-imports
+          mypy py/src/clippy --ignore-missing-imports
 
       - name: Install Boost
         uses: MarkusJx/install-boost@v2.4.5
@@ -53,20 +53,19 @@ jobs:
         run: |
           echo BOOST_ROOT is $BOOST_ROOT /end/
           sudo apt install doxygen
-          TMPDIR=$(mktemp -d)
-          git clone https://github.com/LLNL/clippy-cpp --branch ${{ github.head_ref }} $TMPDIR || git clone https://github.com/LLNL/clippy-cpp --branch master $TMPDIR
-          mkdir -p $TMPDIR/build
-          cd $TMPDIR/build && cmake -DMODERN_CMAKE_BUILD_TESTING=ON  -DBUILD_TESTING=ON -DBOOST_ROOT=$BOOST_ROOT .. && make 
-          ls -l $TMPDIR/build/test
-          BACKEND=$TMPDIR/build/test
+          CPPDIR=cpp
+          mkdir -p $CPPDIR/build
+          cd $CPPDIR/build && cmake -DMODERN_CMAKE_BUILD_TESTING=ON  -DBUILD_TESTING=ON -DBOOST_ROOT=$BOOST_ROOT .. && make 
+          ls -l $CPPDIR/build/examples
+          BACKEND=$CPPDIR/build/examples
           echo "BACKEND=$BACKEND" >> $GITHUB_ENV
 
       - name: Pytest
         env:
           CLIPPY_BACKEND_PATH: ${{ env.BACKEND }}
         run: |
-          echo "backend = $BACKEND"
-          pytest .
+          cd test
+          ./run_tests.sh
       # - name: Pytest
       #   run: |
       #     coverage run --source clippy/ -m pytest && coverage report -m --fail-under 99
