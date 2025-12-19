@@ -24,7 +24,7 @@ from ...utils import flat_dict_to_nested
 from ..serialization import ClippySerializable
 from ..version import _check_version
 from .config import _fs_config_entries
-from .execution import _help, _run, _validate, NonZeroReturnCodeError
+from .execution import _help, _run, _validate
 
 # create a fs-specific configuration.
 cfg = CLIPPY_CONFIG(_fs_config_entries)

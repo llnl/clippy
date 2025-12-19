@@ -16,6 +16,7 @@ from ...clippy_types import AnyDict
 from ..serialization import decode_clippy_json, encode_clippy_json
 from .constants import DRY_RUN_FLAG, HELP_FLAG
 
+
 class NonZeroReturnCodeError(Exception):
     def __init__(self, execcmd, return_code, extramsg, message="returned non-zero exit code"):
         self.return_code = return_code
