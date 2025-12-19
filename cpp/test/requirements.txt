@@ -1,2 +1,0 @@
-llnl-clippy >= 0.4.2
-pytest>=7,<8
