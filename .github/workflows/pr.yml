@@ -60,11 +60,9 @@ jobs:
           cd $CPPDIR/build && cmake -DMODERN_CMAKE_BUILD_TESTING=ON  -DBUILD_TESTING=ON -DBOOST_ROOT=$BOOST_ROOT .. && make 
           ls -l examples
           BACKEND=$CPPDIR/build/examples
-          echo "BACKEND=$BACKEND" >> $GITHUB_ENV
+          # echo "BACKEND=$BACKEND" >> $GITHUB_ENV
 
       - name: Pytest
-        env:
-          CLIPPY_BACKEND_PATH: ${{ env.BACKEND }}
         run: |
           cd test
           ./run_tests.sh
