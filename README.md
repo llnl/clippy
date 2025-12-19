@@ -23,51 +23,50 @@ environment – at the REPL, for example, or within a notebook – without the n
 complex HPC behavior and arcane job submission commands.
 
 ## Installation of Python Code
+There are three ways to use the Python code:
+1. Install from PyPI:
 ```console
-$ pip install .
+$ pip install llnl-clippy
 ```
 
-## Building C++ Examples on LC
+2. Install from the cloned repository:
+```console
+$ cd py/src && pip install .
+```
+
+3. Via `PYTHONPATH` (see below)
+
+## Building C++ Examples
 
 ```console
-$ . /usr/workspace/llamag/spack/share/spack/setup-env.sh
-$ git clone https://github.com/LLNL/clippy-cpp.git
-$ spack load gcc
-$ spack load boost
-$ cd clippy-cpp
-$ mkdir build
-$ cd build
-$ cmake ../
+$ cd cpp && mkdir build && cd build
+$ cmake ..
 $ make
-$ cd ../.. #back to root project directory 
 ```
 
-## Running Current C++ Examples
+## Running Current C++ Examples (after building)
+### From the repository root (using `PYTHONPATH`):
 ```python
-$ CLIPPY_BACKEND_PATH=/path/to/binaries ipython3
+$ PYTHONPATH=py/src:$PYTHONPATH CLIPPY_BACKEND_PATH=$(pwd)/cpp/build/examples ipython
 
-In [1]: from clippy import *
+In [1]: from clippy import ExampleBag
 
- ╭────────────────────────────────────╮
- │ It looks like you want to use HPC. │ 
- │ Would you like help with that?     │
- ╰────────────────────────────────────╯
-  ╲
-   ╲
-    ╭──╮  
-    ⊙ ⊙│╭
-    ││ ││
-    │╰─╯│
-    ╰───╯
+In [2]: b = ExampleBag()
 
-In [2]: c = ExampleBag()  # creates a bag datastructure.
+In [3]: b.insert(5).insert(6).insert(7)    # can chain methods
+Out[3]: <clippy.backends.fs.ExampleBag at 0x107d50830>
 
-In [3]: c.insert("foo").insert("bar")  # mutating methods can be chained
-       
-Out[3]: foo bar
+In [4]: b.insert(5).insert(8)
+Out[4]: <clippy.backends.fs.ExampleBag at 0x107d50830>
 
-In [4]: c.size()  # nonmutating methods return the appropriate output.
-Out[4]: 2
+In [5]: b.size()
+Out[5]: 5
+
+In [6]: b.remove_if(b.value > 6)  # removes 2 elements
+Out[6]: <clippy.backends.fs.ExampleBag at 0x107d50830>
+
+In [7]: b.size()
+Out[7]: 3
 
 ```
 ## Authors
