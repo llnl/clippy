@@ -59,7 +59,7 @@ jobs:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: |
           echo BOOST_ROOT is $BOOST_ROOT /end/
-          sudo apt install doxygen
+          sudo apt install -y doxygen
           CPPDIR=cpp
           mkdir -p $CPPDIR/build
           cd $CPPDIR/build && cmake -DMODERN_CMAKE_BUILD_TESTING=ON -DBUILD_TESTING=ON -DBOOST_ROOT=$BOOST_ROOT .. && make 
