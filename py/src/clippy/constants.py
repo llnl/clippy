@@ -1,4 +1,3 @@
-import logging
 """Clippy constants."""
 
 # These should probably not be changed, which is why they're not in config.
