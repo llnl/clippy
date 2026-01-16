@@ -118,7 +118,7 @@ def encode_clippy_json(o: Any) -> Any:
     json encoder that is clippy-object aware.
     """
     if isinstance(o, jl.Operand):  # expression or variable
-        return {"expression_type": "jsonlogic", "rule": o.prepare()}
+        return {"expression_type": "jsonlogic", "rule": o._prepare()}
 
     return o
 

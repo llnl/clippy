@@ -1,3 +1,4 @@
+import logging
 """Clippy constants."""
 
 # These should probably not be changed, which is why they're not in config.
@@ -23,7 +24,8 @@ SELF_KEY = "returns_self"
 REFERENCE_KEY = "references"
 # key to json entry that holds return data from backend functions.
 RETURN_KEY = "returns"
-
+# key inside STATE_KEY that provides state information for the loglevel
+LOGLEVEL_KEY = "loglevel"
 
 # these keys are returned from the _help output when creating methods
 # for classes.

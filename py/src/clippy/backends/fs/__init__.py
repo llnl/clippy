@@ -202,6 +202,11 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
         # .. add state
         # argdict[STATE_KEY] = self._state
         argdict[clippy_constants.STATE_KEY] = getattr(self, clippy_constants.STATE_KEY)
+
+        # explicitly add loglevel to state if it doesn't already exist.
+        argdict[clippy_constants.STATE_KEY][clippy_constants.LOGLEVEL_KEY] = self.logger.getEffectiveLevel()  # Returns python integer that gets converted by cpp
+
+
         # ~ for key in statedesc:
         #     ~ statej[key] = getattr(self, key)
 

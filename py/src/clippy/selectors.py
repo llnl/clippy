@@ -21,7 +21,7 @@ class Selector(jl.Variable):
     def __hash__(self):
         return hash(self.fullname)
 
-    def prepare(self):
+    def _prepare(self):
         return {"var": self.fullname}
 
     def hierarchy(self, acc: list[tuple[str, str]] | None = None):
@@ -38,7 +38,7 @@ class Selector(jl.Variable):
         return "\n".join(f"{sub_desc[0]:<{maxlen + 2}} {sub_desc[1]}" for sub_desc in hier)
 
     def __str__(self):
-        return repr(self.prepare())
+        return repr(self._prepare())
 
     def to_serial(self):
         return {"var": self.fullname}
