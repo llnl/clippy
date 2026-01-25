@@ -50,18 +50,20 @@ endif()
 
 
 #
-# Boost
-# Download and build Boost::json
-set(BOOST_URL
-    "https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.gz"
+# FetchContent dependencies that can be overridden on the command line.
+#
+set(BOOST_FETCH_URL 
+    "https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.gz" 
     CACHE STRING "URL to fetch Boost tarball")
-
+set(JSONLOGIC_FETCH_GIT 
+    "https://github.com/LLNL/jsonlogic.git" 
+    CACHE STRING "GIT to fetch JsonLogic")
 
 set(BOOST_INCLUDE_LIBRARIES json lexical_cast range)
 set(BUILD_SHARED_LIBS ON)
 FetchContent_Declare(
     Boost
-    URL ${BOOST_URL})
+    URL ${BOOST_FETCH_URL})
 FetchContent_MakeAvailable(Boost)
 
 
@@ -70,7 +72,7 @@ FetchContent_MakeAvailable(Boost)
 set(Boost_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/boost-install) # needed for jsonlogic
 
 FetchContent_Declare(jsonlogic
-    GIT_REPOSITORY https://github.com/LLNL/jsonlogic.git
+    GIT_REPOSITORY ${JSONLOGIC_FETCH_GIT}
     GIT_TAG v0.2.0
     SOURCE_SUBDIR cpp
 )
