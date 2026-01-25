@@ -11,7 +11,7 @@ _clippy_cfg: dict[str, CONFIG_ENTRY] = {
     # backends to use for Clippy.
     "backends": ("CLIPPY_BACKENDS", ["fs"]),
     # semver version restrictions for the backend
-    "required_versions": ("CLIPPY_REQ_VERSIONS", ">=0.2.0"),
+    "required_versions": ("CLIPPY_REQ_VERSIONS", ">=0.5.0"),
     # command prefix used to specify clippy task management with the HPC cluster
     # for instance, if using slurm this could be set to 'srun -n1 -ppdebug'
     "cmd_prefix": ("CLIPPY_CMD_PREFIX", ""),
