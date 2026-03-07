@@ -19,7 +19,7 @@ function ( add_test class_name method_name )
     include/ 
     ${jsonlogic_SOURCE_DIR}/cpp/include
   )
-  target_link_libraries(${target} PRIVATE Boost::json)
+  target_link_libraries(${target} PRIVATE Boost::json Boost::regex)
 endfunction()
 
 

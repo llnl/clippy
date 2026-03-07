@@ -12,10 +12,19 @@
 		"vscode": {
 			"extensions": [
 				"llvm-vs-code-extensions.vscode-clangd",
-				"ms-python.python"
-				// add other extensions as needed
-			]
+				"ms-vscode.cmake-tools",
+				"ms-python.python",
+				"charliermarsh.ruff"
+			],
+			"settings": {
+				"[cpp]": {
+					"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd"
+				},
+				"clangd.checkUpdates": true,
+				"cmake.debugConfig": { "MIMode": "lldb" },
+				"cmake.options.statusBarVisibility": "compact"
+			}
 		}
-	},
+	}
 	//"postCreateCommand": "pip install --break-system-packages -r  ${containerWorkspaceFolder}/test/requirements.txt"
 }

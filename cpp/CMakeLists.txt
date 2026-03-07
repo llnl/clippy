@@ -14,7 +14,7 @@ cmake_policy(SET CMP0135 NEW)
 endif()
 
 project(CLIPPy
-    VERSION 0.5.1
+    VERSION 0.5.2
     DESCRIPTION "Command Line Interface Plus Python"
     LANGUAGES CXX)
 
@@ -59,7 +59,7 @@ set(JSONLOGIC_FETCH_GIT
     "https://github.com/LLNL/jsonlogic.git" 
     CACHE STRING "GIT to fetch JsonLogic")
 
-set(BOOST_INCLUDE_LIBRARIES json lexical_cast range)
+set(BOOST_INCLUDE_LIBRARIES json lexical_cast range regex)
 set(BUILD_SHARED_LIBS ON)
 FetchContent_Declare(
     Boost
@@ -69,11 +69,12 @@ FetchContent_MakeAvailable(Boost)
 
 #
 # JSONLogic
-set(Boost_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/boost-install) # needed for jsonlogic
+# set(Boost_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/boost-install) # needed for jsonlogic
+set(Boost_INCLUDE_DIR ${boost_SOURCE_DIR})
 
 FetchContent_Declare(jsonlogic
     GIT_REPOSITORY ${JSONLOGIC_FETCH_GIT}
-    GIT_TAG v0.2.0
+    GIT_TAG v0.2.3
     SOURCE_SUBDIR cpp
 )
 # set(jsonlogic_INCLUDE_DIR ${jsonlogic_SOURCE_DIR}/cpp/include/jsonlogic)
