@@ -74,7 +74,7 @@ set(Boost_INCLUDE_DIR ${boost_SOURCE_DIR})
 
 FetchContent_Declare(jsonlogic
     GIT_REPOSITORY ${JSONLOGIC_FETCH_GIT}
-    GIT_TAG v0.2.3
+    GIT_TAG v0.2.4
     SOURCE_SUBDIR cpp
 )
 # set(jsonlogic_INCLUDE_DIR ${jsonlogic_SOURCE_DIR}/cpp/include/jsonlogic)
