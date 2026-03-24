@@ -4,13 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llnl-clippy"
-version = "0.5.3"
 authors = [
   { name="Roger Pearce"}, { name="Seth Bromberger"}
 ]
 description="A Python interface to HPC resources"
 readme = "README.md"
-dynamic = ["dependencies", "optional-dependencies"]
+dynamic = ["dependencies", "optional-dependencies", "version"]
 
 requires-python = ">=3.10"
 
@@ -24,6 +23,7 @@ classifiers = [
 ]
 
 [tool.setuptools.dynamic]
+version = {file = "src/clippy/VERSION"}
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies = {dev = {file = ["requirements-dev.txt"] }}
 

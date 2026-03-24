@@ -7,9 +7,12 @@ from __future__ import annotations
 
 import importlib
 import logging
+from pathlib import Path
 
 from .clippy_types import CLIPPY_CONFIG, AnyDict
 from .config import _clippy_cfg
+
+__version__ = (Path(__file__).parent / "VERSION").read_text().strip()
 
 # Create the main configuraton object and expose it globally.
 cfg = CLIPPY_CONFIG(_clippy_cfg)
