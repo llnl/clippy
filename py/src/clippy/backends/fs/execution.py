@@ -99,7 +99,8 @@ def _stream_exec(
                         stdout_buffer += text
                         while "\n" in stdout_buffer:
                             line, stdout_buffer = stdout_buffer.split("\n", 1)
-                            d = json.loads(line, object_hook=decode_clippy_json)
+                            with contextlib.suppress(json.JSONDecodeError):
+                                d = json.loads(line, object_hook=decode_clippy_json)
                     elif fd == stderr_fd:
                         stderr_buffer += text
                         while "\n" in stderr_buffer:

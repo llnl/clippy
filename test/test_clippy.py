@@ -12,6 +12,9 @@ import logging
 clippy.logger.setLevel(logging.WARN)
 logging.getLogger().setLevel(logging.WARN)
 
+@pytest.fixture()
+def examplefn():
+    return clippy.ExampleFunctions()
 
 @pytest.fixture()
 def examplebag():
@@ -206,3 +209,7 @@ def test_graph(examplegraph):
     examplegraph.degree(examplegraph.node.degree)
     c_e_only = examplegraph.dump2(examplegraph.node.degree, where=examplegraph.node.degree > 2)
     assert "c" in c_e_only and "e" in c_e_only and len(c_e_only) == 2
+
+
+def test_noise(examplefn):
+    assert examplefn.returns_noisy_int() == 42
