@@ -10,6 +10,7 @@ import logging
 import os
 import select
 import subprocess
+import sys
 
 from ... import cfg
 from ...clippy_types import AnyDict
@@ -99,7 +100,12 @@ def _stream_exec(
                         stdout_buffer += text
                         while "\n" in stdout_buffer:
                             line, stdout_buffer = stdout_buffer.split("\n", 1)
-                            d = json.loads(line, object_hook=decode_clippy_json)
+                            try:
+                                d = json.loads(line, object_hook=decode_clippy_json)
+                            except json.JSONDecodeError:
+                                warning = f"Warning: invalid JSON on stdout: {line!r}"
+                                stderr_lines.append(warning + "\n")
+                                print(warning, file=sys.stderr, flush=True)
                     elif fd == stderr_fd:
                         stderr_buffer += text
                         while "\n" in stderr_buffer:
