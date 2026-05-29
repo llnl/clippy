@@ -29,7 +29,7 @@ def _stream_exec(
     submission_dict: AnyDict,
     logger: logging.Logger,
     validate: bool,
-) -> tuple[AnyDict | None, str | None, int]:
+) -> tuple[AnyDict | None, list[str], int]:
     """
     Internal function.
 
@@ -38,7 +38,8 @@ def _stream_exec(
 
     Logs debug messages with progress.
     Parses the object and returns a dictionary output.
-    Returns the process result object, stderr, and the process return code.
+    Returns the process result object, stderr as a list of lines,
+    and the process return code.
 
     This function is used by _run and _validate. All options (pre_cmd and flags) should
     already be set.
@@ -111,7 +112,7 @@ def _stream_exec(
                         while "\n" in stderr_buffer:
                             line, stderr_buffer = stderr_buffer.split("\n", 1)
                             stderr_lines.append(line + "\n")
-                            print(line, flush=True)
+                            # print(line, flush=True)
                 except BlockingIOError:
                     # No data available right now
                     continue
@@ -128,23 +129,24 @@ def _stream_exec(
 
         if stderr_buffer.strip():
             stderr_lines.append(stderr_buffer)
-            print(stderr_buffer.rstrip(), flush=True)
+            # print(stderr_buffer.rstrip(), flush=True)
 
-    stderr = "".join(stderr_lines) if stderr_lines else None
+    # stderr = "".join(stderr_lines) if stderr_lines else None
     if progress is not None:
         progress.close()
     # if proc.returncode:
     #     raise (ClippyValidationError(stderr) if validate else ClippyBackendError(stderr))
 
     if not d:
-        return None, stderr, proc.returncode
-    if stderr:
+        return None, stderr_lines, proc.returncode
+    if stderr_lines:
+        stderr = "\n".join(stderr_lines)
         logger.debug("Received stderr: %s", stderr)
     if proc.returncode != 0:
         logger.debug("Process returned %d", proc.returncode)
     logger.debug("run(): final stdout = %s", d)
 
-    return (d, stderr, proc.returncode)
+    return (d, stderr_lines, proc.returncode)
 
 
 def _validate(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> tuple[bool, str]:
@@ -163,7 +165,7 @@ def _validate(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> tup
     return retcode == 0, stderr or ""
 
 
-def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
+def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> tuple[AnyDict, list[str]]:
     """
     converts the dictionary dct into a json file and calls executable cmd. Prepends
     cmd_prefix configuration, if any.
@@ -178,7 +180,7 @@ def _run(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:
     output, stderr, retcode = _stream_exec(execcmd, dct, logger, validate=False)
     if retcode != 0:
         raise NonZeroReturnCodeError(execcmd, retcode, stderr)
-    return output or {}
+    return (output or {}, stderr)
 
 
 def _help(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict:

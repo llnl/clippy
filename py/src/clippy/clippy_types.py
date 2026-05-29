@@ -6,6 +6,7 @@
 Defines types and classes for Clippy.
 """
 
+import copy
 import os
 from typing import Any
 
@@ -33,3 +34,24 @@ class CLIPPY_CONFIG:
         if env is None:
             return val
         return os.environ.get(env, val)
+
+
+class CLIPPY_RUN_OUTPUT:
+    _default_output = {"stderr": []}
+
+    def __init__(self):
+        self._output = copy.deepcopy(self._default_output)
+
+    def stderr(self, n: int | None = 1000):
+        if n == 0:
+            n = None
+        return self._output["stderr"][:n]
+
+    def append_stderr(self, ls: str | list[str]):
+        if isinstance(ls, str):
+            ls = [ls]
+
+        self._output["stderr"].extend(ls)
+
+    def clear(self):
+        self._output = copy.deepcopy(self._default_output)

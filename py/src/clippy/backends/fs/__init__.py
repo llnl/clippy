@@ -12,7 +12,7 @@ from subprocess import CalledProcessError
 from typing import Any
 
 from ... import constants as clippy_constants
-from ...clippy_types import CLIPPY_CONFIG
+from ...clippy_types import CLIPPY_CONFIG, CLIPPY_RUN_OUTPUT
 from ...error import (
     ClippyConfigurationError,
     ClippyInvalidSelectorError,
@@ -103,7 +103,7 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
     class_logger = logging.getLogger(topcfg.get("logname") + "." + name)
     class_logger.setLevel(topcfg.get("loglevel"))
     meta["logger"] = class_logger
-
+    meta["_output"] = CLIPPY_RUN_OUTPUT()
     cls = type(name, (ClippySerializable,), meta)
     classpath = pathlib.Path(path, name)
     for file in os.scandir(classpath):
@@ -227,8 +227,10 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
             raise ClippyValidationError(stderr)
 
         # call executable and create json output
-        
-        outj = _run(executable, argdict, self.logger)
+
+        self._output.clear()
+        outj, stderr_lines = _run(executable, argdict, self.logger)
+        self._output.append_stderr(stderr_lines)
 
         # if we have results that have keys that are in our
         # kwargs, let's update the kwarg references. Works

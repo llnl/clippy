@@ -1,6 +1,7 @@
 add_test(ExampleBag __init__)
 add_test(ExampleBag __str__)
 add_test(ExampleBag insert)
+add_test(ExampleBag stderr_insert)
 add_test(ExampleBag remove)
 add_test(ExampleBag remove_if)
 add_test(ExampleBag size)

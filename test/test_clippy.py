@@ -215,3 +215,9 @@ def test_noise(examplefn, capsys):
     assert examplefn.returns_noisy_int() == 42
     captured = capsys.readouterr()
     assert "Warning: invalid JSON on stdout" in captured.err
+
+def test_stderr_capture(examplebag):
+    examplebag.stderr_insert(123)
+    assert len(examplebag._output.stderr()) == 3
+    assert len(examplebag._output.stderr(2)) == 2
+    assert examplebag._output.stderr()[1] == "Inserted 123 into bag.\n"
