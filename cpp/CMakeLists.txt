@@ -14,7 +14,7 @@ cmake_policy(SET CMP0135 NEW)
 endif()
 
 project(CLIPPy
-    VERSION 0.5.3
+    VERSION 0.5.5
     DESCRIPTION "Command Line Interface Plus Python"
     LANGUAGES CXX)
 
