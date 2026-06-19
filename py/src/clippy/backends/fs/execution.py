@@ -11,6 +11,7 @@ import os
 import select
 import subprocess
 import sys
+import collections
 
 from ... import cfg
 from ...clippy_types import AnyDict
@@ -130,7 +131,16 @@ def _stream_exec(
             stderr_lines.append(stderr_buffer)
             print(stderr_buffer.rstrip(), flush=True)
 
-    stderr = "".join(stderr_lines) if stderr_lines else None
+    # this relies on defaultdict preserving insertion order.
+    stderr_map: dict[str, int] = collections.defaultdict(int)
+    for line in stderr_lines:
+        stderr_map[line] += 1
+
+    if not stderr_lines:
+        stderr = None  # type: ignore
+    else:
+        stderr: str = "".join(stderr_map.keys())
+
     if progress is not None:
         progress.close()
     # if proc.returncode:
