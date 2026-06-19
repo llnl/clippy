@@ -4,14 +4,13 @@ Functions to execute backend programs.
 
 from __future__ import annotations
 
+import collections
 import contextlib
 import json
 import logging
 import os
 import select
 import subprocess
-import sys
-import collections
 
 from ... import cfg
 from ...clippy_types import AnyDict
