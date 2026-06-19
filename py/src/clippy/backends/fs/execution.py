@@ -4,13 +4,13 @@ Functions to execute backend programs.
 
 from __future__ import annotations
 
+import collections
 import contextlib
 import json
 import logging
 import os
 import select
 import subprocess
-import sys
 
 from ... import cfg
 from ...clippy_types import AnyDict
@@ -43,6 +43,8 @@ def _stream_exec(
     This function is used by _run and _validate. All options (pre_cmd and flags) should
     already be set.
     """
+
+    full_stderr: bool = cfg.get("full_stderr") == "YES"
 
     logger.debug(f"Submission = {submission_dict}")
     # PP support passing objects
@@ -103,15 +105,16 @@ def _stream_exec(
                             try:
                                 d = json.loads(line, object_hook=decode_clippy_json)
                             except json.JSONDecodeError:
-                                warning = f"Warning: invalid JSON on stdout: {line!r}"
-                                stderr_lines.append(warning + "\n")
-                                print(warning, file=sys.stderr, flush=True)
+                                # warning = f"Warning: invalid JSON on stdout: {line!r}"
+                                # logger.debug(warning + "\n")
+                                # if it's not valid JSON, let's print it.
+                                print(line, flush=True)
                     elif fd == stderr_fd:
                         stderr_buffer += text
                         while "\n" in stderr_buffer:
                             line, stderr_buffer = stderr_buffer.split("\n", 1)
                             stderr_lines.append(line + "\n")
-                            print(line, flush=True)
+                            # print(line, flush=True)
                 except BlockingIOError:
                     # No data available right now
                     continue
@@ -128,9 +131,23 @@ def _stream_exec(
 
         if stderr_buffer.strip():
             stderr_lines.append(stderr_buffer)
-            print(stderr_buffer.rstrip(), flush=True)
+            # print(stderr_buffer.rstrip(), flush=True)
 
-    stderr = "".join(stderr_lines) if stderr_lines else None
+    if not stderr_lines:
+        stderr = None  # type: ignore
+    else:  # we have stderr - process it
+        if not full_stderr:  # deduplicate
+            logger.debug("stderr deduplication enabled")
+            # this relies on defaultdict preserving insertion order.
+            stderr_map: dict[str, int] = collections.defaultdict(int)
+            for line in stderr_lines:
+                stderr_map[line] += 1
+            stderr = "".join(stderr_map.keys())
+        else:  # use all the lines
+            stderr = "".join(stderr_lines)
+
+    if stderr is not None:
+        print(stderr)
     if progress is not None:
         progress.close()
     # if proc.returncode:

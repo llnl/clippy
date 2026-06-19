@@ -26,4 +26,5 @@ _clippy_cfg: dict[str, CONFIG_ENTRY] = {
         "%(asctime)s [%(filename)s:%(lineno)d (%(funcName)s) %(levelname)s: %(message)s",
     ),
     "logname": ("CLIPPY_LOGNAME", __name__),
+    "full_stderr": ("CLIPPY_FULL_STDERR", "YES"),
 }
