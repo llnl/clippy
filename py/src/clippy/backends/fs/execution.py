@@ -106,9 +106,10 @@ def _stream_exec(
                             try:
                                 d = json.loads(line, object_hook=decode_clippy_json)
                             except json.JSONDecodeError:
-                                warning = f"Warning: invalid JSON on stdout: {line!r}"
-                                stderr_lines.append(warning + "\n")
-                                print(warning, file=sys.stderr, flush=True)
+                                # warning = f"Warning: invalid JSON on stdout: {line!r}"
+                                # logger.debug(warning + "\n")
+                                # if it's not valid JSON, let's print it.
+                                print(line, flush=True)
                     elif fd == stderr_fd:
                         stderr_buffer += text
                         while "\n" in stderr_buffer:
