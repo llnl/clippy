@@ -8,39 +8,33 @@
 #include <boost/json.hpp>
 
 namespace clippy {
-  class object;
-  class array;
-  
-  struct array {    
-      using json_type = ::boost::json::array;
-    
-      array()                        = default;
-      ~array()                       = default;
-      array(const array&)            = default;
-      array(array&&)                 = default;
-      array& operator=(const array&) = default;
-      array& operator=(array&&)      = default;
-      
-      template <class JsonType>
-      void append_json(JsonType obj)
-      {
-        data.emplace_back(std::move(obj).json());
-      }
 
-      template <class T>
-      void append_val(T obj)
-      {
-        data.emplace_back(std::move(obj));
-      }
-      
-            json_type&  json() &       { return data; }
-      const json_type&  json() const & { return data; }
-            json_type&& json() &&      { return std::move(data); }
-                
-    private:
-      json_type data;
-  };
-    
+struct array {
+  using json_type = ::boost::json::array;
+
+  array() = default;
+  ~array() = default;
+  array(const array &) = default;
+  array(array &&) = default;
+  array &operator=(const array &) = default;
+  array &operator=(array &&) = default;
+
+  template <class JsonType> void append_json(JsonType obj) {
+    data.emplace_back(std::move(obj).json());
+  }
+
+  template <class T> void append_val(T obj) {
+    data.emplace_back(std::move(obj));
+  }
+
+  json_type &json() & { return data; }
+  const json_type &json() const & { return data; }
+  json_type &&json() && { return std::move(data); }
+
+private:
+  json_type data;
+};
+
   struct object {
       using json_type = ::boost::json::object;
 
@@ -74,5 +68,4 @@ namespace clippy {
     private:
       json_type data;
   };
-}
-
+  } // namespace clippy

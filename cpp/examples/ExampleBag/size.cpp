@@ -6,9 +6,6 @@
 #include "clippy/clippy.hpp"
 #include <boost/json.hpp>
 #include <cassert>
-#include <iostream>
-
-namespace boostjsn = boost::json;
 
 static const std::string method_name = "size";
 static const std::string state_name = "INTERNAL";

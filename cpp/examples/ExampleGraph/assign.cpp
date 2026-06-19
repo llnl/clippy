@@ -106,7 +106,8 @@ int main(int argc, char **argv) {
 
   boost::json::object submission_data;
 
-  std::cerr << "val = " << val << ", val.kind() = " << val.kind() << std::endl;
+  // std::cerr << "val = " << val << ", val.kind() = " << val.kind() <<
+  // std::endl;
   if (is_node_sel) {
     if (the_graph.has_node_series(subsel)) {
       std::cerr << "Selector already populated" << std::endl;

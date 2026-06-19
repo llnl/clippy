@@ -8,8 +8,6 @@
 #include <boost/json.hpp>
 #include <iostream>
 
-namespace boostjsn = boost::json;
-
 static const std::string method_name = "__str__";
 static const std::string state_name = "INTERNAL";
 

@@ -11,8 +11,6 @@
 #include "clippy/selector.hpp"
 #include "examplegraph.hpp"
 
-namespace boostjsn = boost::json;
-
 static const std::string method_name = "add_series";
 static const std::string graph_state_name = "INTERNAL";
 static const std::string sel_state_name = "selectors";

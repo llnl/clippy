@@ -11,7 +11,6 @@
 namespace boostjsn = boost::json;
 
 static const std::string method_name = "add";
-static const std::string state_name = "INTERNAL";
 
 int main(int argc, char **argv) {
   clippy::clippy clip{method_name, "Adds a subselector"};
