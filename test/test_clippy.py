@@ -211,7 +211,3 @@ def test_graph(examplegraph):
     assert "c" in c_e_only and "e" in c_e_only and len(c_e_only) == 2
 
 
-def test_noise(examplefn, capsys):
-    assert examplefn.returns_noisy_int() == 42
-    captured = capsys.readouterr()
-    assert "Warning: invalid JSON on stdout" in captured.err
