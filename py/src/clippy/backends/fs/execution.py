@@ -45,6 +45,8 @@ def _stream_exec(
     already be set.
     """
 
+    full_stderr: bool = cfg.get("full_stderr") == "YES"
+
     logger.debug(f"Submission = {submission_dict}")
     # PP support passing objects
     # ~ cmd_stdin = json.dumps(submission_dict)
@@ -112,7 +114,7 @@ def _stream_exec(
                         while "\n" in stderr_buffer:
                             line, stderr_buffer = stderr_buffer.split("\n", 1)
                             stderr_lines.append(line + "\n")
-                            print(line, flush=True)
+                            # print(line, flush=True)
                 except BlockingIOError:
                     # No data available right now
                     continue
@@ -129,18 +131,23 @@ def _stream_exec(
 
         if stderr_buffer.strip():
             stderr_lines.append(stderr_buffer)
-            print(stderr_buffer.rstrip(), flush=True)
-
-    # this relies on defaultdict preserving insertion order.
-    stderr_map: dict[str, int] = collections.defaultdict(int)
-    for line in stderr_lines:
-        stderr_map[line] += 1
+            # print(stderr_buffer.rstrip(), flush=True)
 
     if not stderr_lines:
         stderr = None  # type: ignore
-    else:
-        stderr: str = "".join(stderr_map.keys())
+    else:  # we have stderr - process it
+        if not full_stderr:  # deduplicate
+            logger.debug("stderr deduplication enabled")
+            # this relies on defaultdict preserving insertion order.
+            stderr_map: dict[str, int] = collections.defaultdict(int)
+            for line in stderr_lines:
+                stderr_map[line] += 1
+            stderr: str = "".join(stderr_map.keys())
+        else:  # use all the lines
+            stderr: str = "".join(stderr_lines)
 
+    if stderr is not None:
+        print(stderr)
     if progress is not None:
         progress.close()
     # if proc.returncode:
