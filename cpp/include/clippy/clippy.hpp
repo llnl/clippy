@@ -10,7 +10,6 @@
 #include <functional>
 #include <iostream>
 #include <map>
-#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -487,7 +486,7 @@ class clippy {
   boost::json::object m_json_overwrite_args;
   bool m_returns_self = false;
 
-  boost::json::object *m_json_input_state = nullptr;
+  //  boost::json::object *m_json_input_state = nullptr;
   size_t m_next_position = 0;
 
   std::map<std::string, std::function<void(const boost::json::value &)>>
@@ -504,8 +503,8 @@ class clippy {
 }  // namespace clippy
 
 namespace boost::json {
-void tag_invoke(boost::json::value_from_tag, boost::json::value &jv,
-                const std::vector<std::pair<int, int>> &value) {
+inline void tag_invoke(boost::json::value_from_tag, boost::json::value &jv,
+                       const std::vector<std::pair<int, int>> &value) {
   auto &outer_array = jv.emplace_array();
   outer_array.resize(value.size());
 
@@ -517,9 +516,9 @@ void tag_invoke(boost::json::value_from_tag, boost::json::value &jv,
   }
 }
 
-std::vector<std::pair<int, int>> tag_invoke(
-    boost::json::value_to_tag<std::vector<std::pair<int, int>>>,
-    const boost::json::value &jv) {
+inline std::vector<std::pair<int, int>>
+tag_invoke(boost::json::value_to_tag<std::vector<std::pair<int, int>>>,
+           const boost::json::value &jv) {
   std::vector<std::pair<int, int>> value;
 
   auto &outer_array = jv.get_array();
@@ -532,8 +531,9 @@ std::vector<std::pair<int, int>> tag_invoke(
   return value;
 }
 
-void tag_invoke(boost::json::value_from_tag, boost::json::value &jv,
-                const std::vector<std::pair<std::string, std::string>> &value) {
+inline void
+tag_invoke(boost::json::value_from_tag, boost::json::value &jv,
+           const std::vector<std::pair<std::string, std::string>> &value) {
   auto &outer_array = jv.emplace_array();
   outer_array.resize(value.size());
 
@@ -545,7 +545,7 @@ void tag_invoke(boost::json::value_from_tag, boost::json::value &jv,
   }
 }
 
-std::vector<std::pair<std::string, std::string>> tag_invoke(
+inline std::vector<std::pair<std::string, std::string>> tag_invoke(
     boost::json::value_to_tag<std::vector<std::pair<std::string, std::string>>>,
     const boost::json::value &jv) {
   std::vector<std::pair<std::string, std::string>> value;
