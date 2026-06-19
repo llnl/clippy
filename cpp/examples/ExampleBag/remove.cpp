@@ -6,10 +6,8 @@
 #include "clippy/clippy.hpp"
 #include <algorithm>
 #include <boost/json.hpp>
-#include <iostream>
-#include <list>
 
-namespace boostjsn = boost::json;
+#include <list>
 
 static const std::string method_name = "remove";
 static const std::string state_name = "INTERNAL";

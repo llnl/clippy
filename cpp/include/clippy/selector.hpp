@@ -1,7 +1,6 @@
 #pragma once
-#include <deque>
+
 #include <iostream>
-#include <ranges>
 
 #include "boost/json.hpp"
 
@@ -49,22 +48,23 @@ class selector {
   }
 };
 
-std::ostream &operator<<(std::ostream &os, const selector &sel) {
+inline std::ostream &operator<<(std::ostream &os, const selector &sel) {
   os << sel.sel_str;
   return os;
 }
 
-selector tag_invoke(boost::json::value_to_tag<selector> /*unused*/,
-                    const boost::json::value &v) {
+inline selector tag_invoke(boost::json::value_to_tag<selector> /*unused*/,
+                           const boost::json::value &v) {
   return v.as_object();
 }
 
-void tag_invoke(boost::json::value_from_tag /*unused*/, boost::json::value &v,
-                const selector &sel) {
-  std::cerr << "This should not be called." << std::endl;
-  // std::map<std::string, std::string> o {};
-  // o["expression_type"] = "jsonlogic";
-  // o["rule"] = {{"var", sel.sel_str}};
-  // v =  {"expression_type": "jsonlogic", "rule": {"var":
-  // "node.degree"}}}sel.sel_str;
-}
+// void tag_invoke([[maybe_unused]] boost::json::value_from_tag /*unused*/,
+//                 [[maybe_unused]] boost::json::value &v,
+//                 [[maybe_unused]] const selector &sel /*unused*/) {
+//   std::cerr << "This should not be called." << std::endl;
+// std::map<std::string, std::string> o {};
+// o["expression_type"] = "jsonlogic";
+// o["rule"] = {{"var", sel.sel_str}};
+// v =  {"expression_type": "jsonlogic", "rule": {"var":
+// "node.degree"}}}sel.sel_str;
+//}

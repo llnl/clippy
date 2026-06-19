@@ -11,7 +11,6 @@
 
 namespace boostjsn = boost::json;
 
-static const std::string class_name = "nClippyExample";
 static const std::string method_name = "remove_if";
 static const std::string state_name = "INTERNAL";
 

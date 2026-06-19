@@ -7,8 +7,6 @@
 #include "examplegraph.hpp"
 #include <boost/json.hpp>
 
-namespace boostjsn = boost::json;
-
 static const std::string method_name = "__init__";
 static const std::string state_name = "INTERNAL";
 static const std::string sel_state_name = "selectors";

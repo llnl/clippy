@@ -7,8 +7,6 @@
 #include "examplegraph.hpp"
 #include <boost/json.hpp>
 
-namespace boostjsn = boost::json;
-
 static const std::string method_name = "add_node";
 static const std::string state_name = "INTERNAL";
 

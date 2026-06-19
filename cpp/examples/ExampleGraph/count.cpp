@@ -8,14 +8,12 @@
 #include <clippy/clippy.hpp>
 #include <iostream>
 #include <jsonlogic/src.hpp>
-#include <variant>
 
 #include "clippy/selector.hpp"
 #include "examplegraph.hpp"
 
 static const std::string method_name = "count";
 static const std::string state_name = "INTERNAL";
-static const std::string sel_state_name = "selectors";
 
 int main(int argc, char **argv) {
   clippy::clippy clip{method_name,

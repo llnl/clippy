@@ -1,13 +1,11 @@
 #pragma once
 #include <boost/json.hpp>
-// #include <boost/json/conversion.hpp>
 #include <boost/json/src.hpp>
 #include <cstdint>
 #include <iostream>
 #include <map>
 #include <optional>
 #include <ranges>
-#include <set>
 #include <string>
 #include <utility>
 #include <variant>
@@ -53,13 +51,13 @@ class locator {
     }
   }
 };
-void tag_invoke(boost::json::value_from_tag /*unused*/, boost::json::value &v,
-                locator l) {
+inline void tag_invoke(boost::json::value_from_tag /*unused*/,
+                       boost::json::value &v, locator l) {
   v = l.loc;
 }
 
-locator tag_invoke(boost::json::value_to_tag<locator> /*unused*/,
-                   const boost::json::value &v) {
+inline locator tag_invoke(boost::json::value_to_tag<locator> /*unused*/,
+                          const boost::json::value &v) {
   return boost::json::value_to<index>(v);
 }
 template <typename K, typename... Vs>
@@ -174,14 +172,14 @@ class mvmap {
       for (auto el : series_r) {
         f(itk_r[el.first], locator(el.first), el.second);
       }
-    };
+    }
 
     template <typename F>
     void for_all(F f) const {
       for (auto el : series_r) {
         f(itk_r[el.first], locator(el.first), el.second);
       }
-    };
+    }
 
     // F takes (K key, locator, V value)
     template <typename F>
@@ -196,7 +194,7 @@ class mvmap {
       for (auto ltd : indices_to_delete) {
         erase(locator(ltd));
       }
-    };
+    }
 
     void erase(const locator &l) {
       auto i = l.loc;

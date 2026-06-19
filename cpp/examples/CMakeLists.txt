@@ -11,6 +11,7 @@ function ( add_test class_name method_name )
   set(target "${class_name}_${method_name}")
   add_executable(${target} ${source})
   # target_include_directories(${target} PRIVATE ${Boost_INCLUDE_DIRS})
+  target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR} include/)
   set_target_properties(${target} PROPERTIES OUTPUT_NAME "${method_name}" )
   target_include_directories(${target} PRIVATE

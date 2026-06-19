@@ -6,13 +6,10 @@
 #include <boost/json.hpp>
 #include <cassert>
 #include <iostream>
-#include <variant>
 
 #include "clippy/clippy.hpp"
 #include "clippy/selector.hpp"
 #include "examplegraph.hpp"
-
-namespace boostjsn = boost::json;
 
 static const std::string method_name = "copy_series";
 static const std::string graph_state_name = "INTERNAL";

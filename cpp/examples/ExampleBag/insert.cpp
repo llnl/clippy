@@ -6,7 +6,6 @@
 #include "clippy/clippy.hpp"
 #include <boost/json.hpp>
 
-static const std::string class_name = "ExampleBag";
 static const std::string method_name = "insert";
 static const std::string state_name = "INTERNAL";
 

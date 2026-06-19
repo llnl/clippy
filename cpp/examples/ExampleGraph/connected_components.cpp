@@ -91,10 +91,10 @@ int main(int argc, char **argv) {
   std::vector<int64_t> components(the_graph.nv());
   std::iota(components.begin(), components.end(), 0);
 
-  for (int64_t i = 0; i < the_graph.nv(); ++i) {
+  for (size_t i = 0; i < the_graph.nv(); ++i) {
     if (!visited[i]) {
       std::queue<int64_t> q;
-      q.push(i);
+      q.push(int64_t(i));
       while (!q.empty()) {
         int64_t v = q.front();
         q.pop();
