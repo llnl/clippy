@@ -142,9 +142,9 @@ def _stream_exec(
             stderr_map: dict[str, int] = collections.defaultdict(int)
             for line in stderr_lines:
                 stderr_map[line] += 1
-            stderr: str = "".join(stderr_map.keys())
+            stderr = "".join(stderr_map.keys())
         else:  # use all the lines
-            stderr: str = "".join(stderr_lines)
+            stderr = "".join(stderr_lines)
 
     if stderr is not None:
         print(stderr)
