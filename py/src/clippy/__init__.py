@@ -48,4 +48,12 @@ def load_classes():
             globals()[name] = c
 
 
+def add_backend_path(path: str) -> None:
+    """Generate and expose classes found in one filesystem backend path."""
+    from .backends import fs  # pylint: disable=import-outside-toplevel
+
+    for name, generated_class in fs.classes(paths=[path]).items():
+        globals()[name] = generated_class
+
+
 load_classes()

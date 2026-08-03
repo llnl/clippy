@@ -1,5 +1,7 @@
 import pytest
 import sys
+import os
+import subprocess
 
 sys.path.append("src")
 
@@ -8,6 +10,7 @@ import clippy
 from clippy.error import ClippyValidationError, ClippyInvalidSelectorError
 from clippy.backends.fs.execution import NonZeroReturnCodeError
 import logging
+from clippy.backends import fs
 
 clippy.logger.setLevel(logging.WARN)
 logging.getLogger().setLevel(logging.WARN)
@@ -43,6 +46,41 @@ def examplegraph():
 
 def test_imports():
     assert "ExampleBag" in clippy.__dict__
+
+
+def test_import_without_backend_path():
+    env = os.environ.copy()
+    env.pop("CLIPPY_BACKEND_PATH", None)
+
+    result = subprocess.run(
+        [sys.executable, "-c", "import clippy"],
+        check=False,
+        capture_output=True,
+        env=env,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+
+
+def test_add_backend_path_scans_only_explicit_path(monkeypatch):
+    class AddedClass:
+        pass
+
+    calls = []
+
+    def classes(*, paths=None):
+        calls.append(paths)
+        return {"AddedClass": AddedClass}
+
+    monkeypatch.setattr(fs, "classes", classes)
+    monkeypatch.delattr(clippy, "AddedClass", raising=False)
+
+    clippy.add_backend_path("/foo/bar")
+    clippy.add_backend_path("/foo/bar")
+
+    assert calls == [["/foo/bar"], ["/foo/bar"]]
+    assert clippy.AddedClass is AddedClass
 
 
 def test_bag(examplebag):
