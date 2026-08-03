@@ -84,6 +84,13 @@ def classes(paths: list[str] | None = None) -> dict[str, Any]:
     return _classes
 
 
+def add_backend_path(path: str) -> None:
+    """Generate and expose classes found in one filesystem backend path."""
+    from ... import _register_classes  # pylint: disable=import-outside-toplevel
+
+    _register_classes(classes(paths=[path]))
+
+
 def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
     """Given a name, a path, and a master configuration, create
     a class with the given name, and add methods based on the

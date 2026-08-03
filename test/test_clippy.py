@@ -76,8 +76,8 @@ def test_add_backend_path_scans_only_explicit_path(monkeypatch):
     monkeypatch.setattr(fs, "classes", classes)
     monkeypatch.delattr(clippy, "AddedClass", raising=False)
 
-    clippy.add_backend_path("/foo/bar")
-    clippy.add_backend_path("/foo/bar")
+    fs.add_backend_path("/foo/bar")
+    fs.add_backend_path("/foo/bar")
 
     assert calls == [["/foo/bar"], ["/foo/bar"]]
     assert clippy.AddedClass is AddedClass
