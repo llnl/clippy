@@ -60,26 +60,35 @@ def get_cfg() -> CLIPPY_CONFIG:
     return cfg
 
 
-def classes() -> dict[str, Any]:
+def classes(paths: list[str] | None = None) -> dict[str, Any]:
     """This is a mandatory function for all backends. It returns a dictionary of class name
     to the actual Class for all classes supported by the backend."""
     from ... import cfg as topcfg  # pylint: disable=import-outside-toplevel
 
-    paths = cfg.get("fs_backend_paths")
+    if paths is None:
+        paths = cfg.get("fs_backend_paths")
+
     _classes = {}
     # iterate over all (filesystem) paths and for those that aren't explicitly excluded,
     # create the class based on the directory name and add methods based on the executables
     # within the directory.
     for path in paths:
-        files = os.scandir(path)
-        for f in files:
-            if f.name in cfg.get("fs_exclude_paths"):
-                continue
-            p = pathlib.Path(path, f)
-            if os.path.isdir(p):
-                _cls = _create_class(f.name, path, topcfg)
-                _classes[f.name] = _cls
+        with os.scandir(path) as files:
+            for f in files:
+                if f.name in cfg.get("fs_exclude_paths"):
+                    continue
+                p = pathlib.Path(path, f)
+                if os.path.isdir(p):
+                    _cls = _create_class(f.name, path, topcfg)
+                    _classes[f.name] = _cls
     return _classes
+
+
+def add_backend_path(path: str) -> None:
+    """Generate and expose classes found in one filesystem backend path."""
+    from ... import _register_classes  # pylint: disable=import-outside-toplevel
+
+    _register_classes(classes(paths=[path]))
 
 
 def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):

@@ -29,6 +29,11 @@ logger.addHandler(handler)
 logger.setLevel(cfg.get("loglevel"))
 
 
+def _register_classes(generated_classes: AnyDict) -> None:
+    """Expose backend-generated classes in the clippy namespace."""
+    globals().update(generated_classes)
+
+
 def load_classes():
     """For each listed backend, import the module of the same name. The
     backend should expose two functions: a classes() function that returns
@@ -40,12 +45,7 @@ def load_classes():
     for backend in cfg.get("backends"):
         b = importlib.import_module(f".backends.{backend}", package=__name__)
         setattr(cfg, backend, b.get_cfg())
-        for name, c in b.classes().items():
-            # backend_config = importlib.import_module(f".backends.{name}.config.{name}_config")
-            # for k, v in backend_config.items():
-            #     cfg._set(k, v)
-
-            globals()[name] = c
+        _register_classes(b.classes())
 
 
 load_classes()
