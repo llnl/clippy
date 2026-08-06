@@ -61,9 +61,20 @@ def _stream_exec(
         assert proc.stdout is not None
         assert proc.stderr is not None
 
-        proc.stdin.write(cmd_stdin + "\n")
-        proc.stdin.flush()
-        proc.stdin.close()
+        # A command such as --clippy-help may exit without reading stdin. This
+        # is more likely to happen when several commands start concurrently,
+        # so tolerate the same early pipe closure as subprocess.communicate().
+        stdin = proc.stdin
+        try:
+            stdin.write(cmd_stdin + "\n")
+            stdin.flush()
+        except BrokenPipeError:
+            pass
+        finally:
+            with contextlib.suppress(BrokenPipeError):
+                stdin.close()
+            # Prevent Popen.__exit__ from trying to flush a broken pipe again.
+            proc.stdin = None
 
         progress = None
         # Use select with file descriptors and non-blocking reads
