@@ -8,6 +8,7 @@ import os
 import pathlib
 import stat
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from subprocess import CalledProcessError
 from typing import Any
 
@@ -115,13 +116,29 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
 
     cls = type(name, (ClippySerializable,), meta)
     classpath = pathlib.Path(path, name)
+    executables = []
     for file in os.scandir(classpath):
         fullpath = pathlib.Path(classpath, file)
         if _is_user_executable(fullpath):
+            executables.append(fullpath)
+
+    # Query executable metadata concurrently, then install methods in scan order.
+    # Installing sequentially preserves deterministic behavior when multiple
+    # executables expose the same method name.
+    with ThreadPoolExecutor() as executor:
+        definitions = [
+            (executable, executor.submit(_get_method_definition, str(executable), class_logger))
+            for executable in executables
+        ]
+
+        for executable, definition in definitions:
             try:
-                _process_executable(str(fullpath), cls)
+                method, docstring, args = definition.result()
             except ClippyConfigurationError as e:
-                class_logger.warning("error processing %s: %s; ignoring", fullpath, e)
+                class_logger.warning("error processing %s: %s; ignoring", executable, e)
+                continue
+
+            _install_method(str(executable), cls, method, docstring, args)
 
     # add the selectors
     # this should be in the meta.json file.
@@ -140,10 +157,16 @@ def _process_executable(executable: str, cls):
              symtable (by default globals()).
     """
 
-    # grab the help string, which gives us the docstring and  all arguments.
-    cls.logger.debug("processing executable %s", executable)
+    method, docstring, args = _get_method_definition(executable, cls.logger)
+    _install_method(executable, cls, method, docstring, args)
+    return cls
+
+
+def _get_method_definition(executable: str, logger):
+    """Query an executable and return the information needed to define its method."""
+    logger.debug("processing executable %s", executable)
     try:
-        j = _help(executable, {}, cls.logger)
+        j = _help(executable, {}, logger)
 
     except CalledProcessError as e:
         raise ClippyConfigurationError("Execution error " + e.stderr) from e
@@ -182,10 +205,14 @@ def _process_executable(executable: str, cls):
 
     # if we don't explicitly pass the method name, use the name of the exe.
     method = j.get(clippy_constants.METHODNAME_KEY, os.path.basename(executable))
+    return method, docstring, args
+
+
+def _install_method(executable: str, cls, method: str, docstring: str, args: dict[str, dict]) -> None:
+    """Install a previously discovered executable method on a generated class."""
     if hasattr(cls, method) and not method.startswith("__"):
         cls.logger.warning(f"Overwriting existing method {method} for class {cls} with executable {executable}")
     _define_method(cls, method, executable, docstring, args)
-    return cls
 
 
 def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict[str, dict] | None):  # pylint: disable=too-complex
