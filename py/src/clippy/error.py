@@ -18,6 +18,12 @@ class ClippyConfigurationError(ClippyError):
     """
 
 
+class ClippyVersionError(ClippyConfigurationError):
+    """
+    This error represents a backend executable whose version is incompatible with this clippy.
+    """
+
+
 class ClippyBackendError(ClippyError):
     """
     This error should be thrown when the backend returns an abend.

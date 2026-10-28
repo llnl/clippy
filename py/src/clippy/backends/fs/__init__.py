@@ -19,6 +19,7 @@ from ...error import (
     ClippyInvalidSelectorError,
     ClippyTypeError,
     ClippyValidationError,
+    ClippyVersionError,
 )
 from ...selectors import Selector
 from ...utils import flat_dict_to_nested
@@ -134,6 +135,9 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
         for executable, definition in definitions:
             try:
                 method, docstring, args = definition.result()
+            except ClippyVersionError as e:
+                class_logger.warning("%s; ignoring", e)
+                continue
             except ClippyConfigurationError as e:
                 raise ClippyConfigurationError(f"error processing {executable}: {e}") from e
 
@@ -176,7 +180,7 @@ def _get_method_definition(executable: str, logger):
         raise ClippyConfigurationError("No method_name in " + executable)
     # check version
     if not _check_version(j):
-        raise ClippyConfigurationError("Invalid version information in " + executable)
+        raise ClippyVersionError("Invalid version information in " + executable)
 
     docstring = j.get(clippy_constants.DOCSTRING_KEY, "")
     args: dict[str, dict] = j.get(clippy_constants.ARGS_KEY, {})  # this is now a dict.

@@ -14,6 +14,7 @@ import sys
 
 from ... import cfg
 from ...clippy_types import AnyDict
+from ...error import ClippyConfigurationError
 from ..serialization import decode_clippy_json, encode_clippy_json
 from .constants import DRY_RUN_FLAG, HELP_FLAG
 
@@ -204,5 +205,10 @@ def _help(cmd: str | list[str], dct: AnyDict, logger: logging.Logger) -> AnyDict
     logger.debug("Running %s", execcmd)
     # should we do something with stderr?
 
-    output, _, _ = _stream_exec(execcmd, dct, logger, validate=True)
-    return output or {}
+    output, stderr, retcode = _stream_exec(execcmd, dct, logger, validate=True)
+    if retcode != 0 or not output:
+        # a negative return code means the process was killed by that signal (e.g., -9 for SIGKILL)
+        raise ClippyConfigurationError(
+            f"{execcmd} returned {retcode} with {'no' if not output else 'some'} JSON output; stderr: {stderr or '(none)'}"
+        )
+    return output
