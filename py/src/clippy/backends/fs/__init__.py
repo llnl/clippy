@@ -135,8 +135,7 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
             try:
                 method, docstring, args = definition.result()
             except ClippyConfigurationError as e:
-                class_logger.warning("error processing %s: %s; ignoring", executable, e)
-                continue
+                raise ClippyConfigurationError(f"error processing {executable}: {e}") from e
 
             _install_method(str(executable), cls, method, docstring, args)
 
