@@ -243,7 +243,6 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
         argdict[clippy_constants.STATE_KEY][clippy_constants.LOGLEVEL_KEY] = self.logger.getEffectiveLevel()
         # Returns python integer that gets converted by cpp
 
-
         # ~ for key in statedesc:
         #     ~ statej[key] = getattr(self, key)
 
@@ -263,7 +262,7 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
             raise ClippyValidationError(stderr)
 
         # call executable and create json output
-        
+
         outj = _run(executable, argdict, self.logger)
 
         # if we have results that have keys that are in our
