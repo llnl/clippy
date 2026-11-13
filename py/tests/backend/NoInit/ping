@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Fake clippy backend executable for frontend tests.
+
+The same script is installed under several names; the method it implements
+is chosen by the executable's basename.
+"""
+
+import json
+import os
+import sys
+
+METHODS = {
+    "__init__": ("create a fake graph", {"path": {"desc": "storage path", "position": 0}}),
+    "add_series": ("add a node series", {"name": {"desc": "series name", "position": 0}}),
+    "raw": ("return a __clippy_type__-shaped dict", {}),
+    "ping": ("return pong", {}),
+}
+
+method = os.path.basename(sys.argv[0])
+desc, args = METHODS[method]
+
+if "--clippy-help" in sys.argv:
+    print(json.dumps({"method_name": method, "desc": desc, "version": "0.5.7", "args": args}))
+    sys.exit(0)
+
+if "--clippy-validate" in sys.argv:
+    sys.exit(0)
+
+inp = json.loads(sys.stdin.readline())
+state = inp.get("_state", {})
+
+if method == "__init__":
+    out = {"_state": {"path": inp["path"], "series": []}}
+elif method == "add_series":
+    series = [*state.get("series", []), inp["name"]]
+    out = {
+        "_state": {"path": state.get("path"), "series": series},
+        "_selectors": {f"node.{s}": f"series {s}" for s in series},
+    }
+elif method == "raw":
+    out = {"returns": {"__clippy_type__": {"__module__": "clippy", "__class__": "G", "state": state}}}
+elif method == "ping":
+    out = {"returns": "pong"}
+
+print(json.dumps(out))

@@ -40,9 +40,6 @@ class Selector(jl.Variable):
     def __str__(self):
         return repr(self._prepare())
 
-    def _to_serial(self):
-        return {"var": self._fullname}
-
     def _add_subselector(self, name: str, docstr: str):
         """add a subselector to this selector"""
         subsel = Selector(self, name, docstr)

@@ -11,11 +11,23 @@ import os
 import select
 import subprocess
 import sys
+from typing import Any
+
+import jsonlogic as jl
 
 from ... import cfg
 from ...clippy_types import AnyDict
-from ..serialization import decode_clippy_json, encode_clippy_json
 from .constants import DRY_RUN_FLAG, HELP_FLAG
+
+
+def encode_clippy_json(o: Any) -> Any:
+    """
+    json encoder that converts jsonlogic expressions and selectors to rules.
+    """
+    if isinstance(o, jl.Operand):  # expression or variable
+        return {"expression_type": "jsonlogic", "rule": o._prepare()}
+
+    return o
 
 
 class NonZeroReturnCodeError(Exception):
@@ -113,7 +125,7 @@ def _stream_exec(
                         while "\n" in stdout_buffer:
                             line, stdout_buffer = stdout_buffer.split("\n", 1)
                             try:
-                                d = json.loads(line, object_hook=decode_clippy_json)
+                                d = json.loads(line)
                             except json.JSONDecodeError:
                                 warning = f"Warning: invalid JSON on stdout: {line!r}"
                                 stderr_lines.append(warning + "\n")
@@ -136,7 +148,7 @@ def _stream_exec(
         # Process any remaining buffered data
         if stdout_buffer.strip():
             with contextlib.suppress(json.JSONDecodeError):
-                d = json.loads(stdout_buffer, object_hook=decode_clippy_json)
+                d = json.loads(stdout_buffer)
 
         if stderr_buffer.strip():
             stderr_lines.append(stderr_buffer)

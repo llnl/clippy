@@ -20,8 +20,8 @@ from ...error import (
     ClippyTypeError,
     ClippyValidationError,
 )
+from ...selectors import Selector
 from ...utils import flat_dict_to_nested
-from ..serialization import ClippySerializable
 from ..version import _check_version
 from .config import _fs_config_entries
 from .execution import _help, _run, _validate
@@ -91,6 +91,13 @@ def add_backend_path(path: str) -> None:
     _register_classes(classes(paths=[path]))
 
 
+def _init_instance(self):
+    """Give a new instance empty state and its own copies of the class's initial selectors."""
+    self._state = {}
+    for name, docstr in type(self)._initial_selectors.items():
+        setattr(self, name, Selector(None, name, docstr))
+
+
 def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
     """Given a name, a path, and a master configuration, create
     a class with the given name, and add methods based on the
@@ -106,9 +113,12 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
             meta = json.load(json_file)
     # pull the selectors out since we don't want them in the class definition right now
     selectors = meta.pop(clippy_constants.INITIAL_SELECTOR_KEY, {})
-    # Selectors are per-instance (created in ClippySerializable.__init__);
+    # Selectors are per-instance (created in _init_instance);
     # the class only records which ones each instance should get.
     meta["_initial_selectors"] = selectors
+    # Default constructor for classes without an __init__ executable.
+    # If there is one, _define_method replaces this and calls _init_instance itself.
+    meta["__init__"] = _init_instance
     meta["_name"] = name
     meta["_path"] = path
     meta["_cfg"] = topcfg
@@ -116,7 +126,7 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
     class_logger.setLevel(topcfg.get("loglevel"))
     meta["logger"] = class_logger
 
-    cls = type(name, (ClippySerializable,), meta)
+    cls = type(name, (), meta)
     classpath = pathlib.Path(path, name)
     executables = []
     for file in os.scandir(classpath):
@@ -223,9 +233,9 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
         """
 
         # special cases for __init__
-        # call the superclass to initialize the _state
+        # initialize _state and per-instance selectors
         if name == "__init__":
-            super(cls, self).__init__()
+            _init_instance(self)
 
         argdict = {}
         # statej  = {}
