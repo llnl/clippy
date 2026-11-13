@@ -47,8 +47,9 @@ class Selector(jl.Variable):
         self._subselectors.add(subsel)
 
     def _del_subselector(self, name: str):
-        delattr(self, name)
+        """remove a subselector from this selector"""
         self._subselectors.remove(getattr(self, name))
+        delattr(self, name)
 
     def _clear_subselectors(self):
         """removes all subselectors"""
