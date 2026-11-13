@@ -22,7 +22,7 @@ from .constants import DRY_RUN_FLAG, HELP_FLAG
 
 def encode_clippy_json(o: Any) -> Any:
     """
-    json encoder that converts jsonlogic expressions and selectors to rules.
+    json encoder that converts jsonlogic expressions and keypaths to rules.
     """
     if isinstance(o, jl.Operand):  # expression or variable
         return {"expression_type": "jsonlogic", "rule": o._prepare()}

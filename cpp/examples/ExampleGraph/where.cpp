@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "clippy/selector.hpp"
+#include "clippy/keypath.hpp"
 #include "examplegraph.hpp"
 #include "jsonlogic/logic.hpp"
 
@@ -49,17 +49,17 @@ auto parse_where_expression(M &mvmap_, boost::json::object &expression,
     // std::cerr << "    apply_jl:  # of vars: " << vars.size() << std::endl;
     for (const auto &var : vars) {
       // std::cerr << "    apply_jl: var: " << var << std::endl;
-      auto var_sel = selector(std::string(var));
-      // std::cerr << "  apply_jl: var_sel = " << var_sel << std::endl;
-      // if (!var_sel.headeq("node")) {
-      //   std::cerr << "selector is not a node selector; skipping." <<
+      auto var_kp = keypath(std::string(var));
+      // std::cerr << "  apply_jl: var_kp = " << var_kp << std::endl;
+      // if (!var_kp.headeq("node")) {
+      //   std::cerr << "keypath is not a node keypath; skipping." <<
       //   std::endl; continue;
       // }
-      auto var_tail = var_sel.tail().value();
-      std::string var_str = std::string(var_sel);
-      // std::cerr << "    apply_jl: var: " << var_sel << std::endl;
+      auto var_tail = var_kp.tail().value();
+      std::string var_str = std::string(var_kp);
+      // std::cerr << "    apply_jl: var: " << var_kp << std::endl;
       if (mvmap_.has_series(var_tail)) {
-        // std::cerr << "    apply_jl: has series: " << var_sel << std::endl;
+        // std::cerr << "    apply_jl: has series: " << var_kp << std::endl;
         auto val = mvmap_.get_as_variant(var_tail, loc);
         if (val.has_value()) {
           // std::cerr << "    apply_jl: val has value" << std::endl;
@@ -72,11 +72,11 @@ auto parse_where_expression(M &mvmap_, boost::json::object &expression,
               },
               *val);
         } else {
-          std::cerr << "    apply_jl: no value for " << var_sel << std::endl;
+          std::cerr << "    apply_jl: no value for " << var_kp << std::endl;
           submission_data[var_str] = boost::json::value();
         }
       } else {
-        std::cerr << "    apply_jl: no series for " << var_sel << std::endl;
+        std::cerr << "    apply_jl: no series for " << var_kp << std::endl;
       }
     }
     // std::cerr << "    apply_jl: submission_data: " << submission_data

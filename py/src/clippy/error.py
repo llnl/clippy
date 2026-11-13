@@ -42,7 +42,7 @@ class ClippyTypeError(ClippyError):
     """
 
 
-class ClippyInvalidSelectorError(ClippyError):
+class ClippyInvalidKeypathError(ClippyError):
     """
-    This error represents an error with a selector that is not defined for a given clippy class.
+    This error represents an error with a keypath that is not defined for a given clippy class.
     """

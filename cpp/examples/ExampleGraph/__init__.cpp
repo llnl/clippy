@@ -9,7 +9,7 @@
 
 static const std::string method_name = "__init__";
 static const std::string state_name = "INTERNAL";
-static const std::string sel_state_name = "selectors";
+static const std::string kp_state_name = "keypaths";
 
 int main(int argc, char **argv) {
   clippy::clippy clip{method_name, "Initializes an ExampleGraph"};
@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
   // examplegraph needs to be convertible to json
   examplegraph::examplegraph the_graph;
   clip.set_state(state_name, the_graph);
-  std::map<std::string, std::string> selectors;
-  clip.set_state(sel_state_name, selectors);
+  std::map<std::string, std::string> keypaths;
+  clip.set_state(kp_state_name, keypaths);
 
   return 0;
 }

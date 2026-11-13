@@ -7,7 +7,7 @@ sys.path.append("src")
 
 import jsonlogic as jl
 import clippy
-from clippy.error import ClippyValidationError, ClippyInvalidSelectorError
+from clippy.error import ClippyValidationError, ClippyInvalidKeypathError
 from clippy.backends.fs.execution import NonZeroReturnCodeError
 import logging
 from clippy.backends import fs
@@ -35,8 +35,8 @@ def examplefunction():
 
 
 @pytest.fixture()
-def exampleselector():
-    return clippy.ExampleSelector()
+def examplekeypath():
+    return clippy.ExampleKeypath()
 
 
 @pytest.fixture()
@@ -214,25 +214,25 @@ def test_clippy_returns_optional_string(examplefunction):
     assert examplefunction.call_with_optional_string(name="Seth") == "Howdy, Seth"
 
 
-def test_selectors(exampleselector):
-    assert hasattr(exampleselector, "nodes")
+def test_keypaths(examplekeypath):
+    assert hasattr(examplekeypath, "nodes")
 
-    exampleselector.add(exampleselector.nodes, "b", desc="docstring for nodes.b").add(
-        exampleselector.nodes.b, "c", desc="docstring for nodes.b.c"
+    examplekeypath.add(examplekeypath.nodes, "b", desc="docstring for nodes.b").add(
+        examplekeypath.nodes.b, "c", desc="docstring for nodes.b.c"
     )
-    assert hasattr(exampleselector.nodes, "b")
-    assert hasattr(exampleselector.nodes.b, "c")
-    assert exampleselector.nodes.b.__doc__ == "docstring for nodes.b"
-    assert exampleselector.nodes.b.c.__doc__ == "docstring for nodes.b.c"
+    assert hasattr(examplekeypath.nodes, "b")
+    assert hasattr(examplekeypath.nodes.b, "c")
+    assert examplekeypath.nodes.b.__doc__ == "docstring for nodes.b"
+    assert examplekeypath.nodes.b.c.__doc__ == "docstring for nodes.b.c"
 
-    assert isinstance(exampleselector.nodes.b, jl.Variable)
-    assert isinstance(exampleselector.nodes.b.c, jl.Variable)
+    assert isinstance(examplekeypath.nodes.b, jl.Variable)
+    assert isinstance(examplekeypath.nodes.b.c, jl.Variable)
 
-    with pytest.raises(ClippyInvalidSelectorError):
-        exampleselector.add(exampleselector.nodes, "_bad", desc="this is a bad selector name")
+    with pytest.raises(ClippyInvalidKeypathError):
+        examplekeypath.add(examplekeypath.nodes, "_bad", desc="this is a bad keypath name")
 
-    # with pytest.raises(ClippyInvalidSelectorError):
-    #     exampleselector.add(exampleselector, 'bad', desc="this is a top-level selector")
+    # with pytest.raises(ClippyInvalidKeypathError):
+    #     examplekeypath.add(examplekeypath, 'bad', desc="this is a top-level keypath")
 
 
 def test_graph(examplegraph):

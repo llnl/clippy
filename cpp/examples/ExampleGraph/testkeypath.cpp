@@ -1,12 +1,12 @@
-#include "../../include/clippy/selector.hpp"
+#include "../../include/clippy/keypath.hpp"
 #include <iostream>
 
 int main() {
-  selector s = selector("foo.bar.baz");
+  keypath s = keypath("foo.bar.baz");
 
-  selector zzz = "foo.zoo.boo";
+  keypath zzz = "foo.zoo.boo";
 
-  selector s2{"x.y.z"};
+  keypath s2{"x.y.z"};
   std::cout << "s = " << s << "\n";
   assert(s.headeq("foo"));
   assert(!s.headeq("bar"));
@@ -14,7 +14,7 @@ int main() {
   auto val = boost::json::value_from(s);
   auto str = boost::json::serialize(val);
 
-  auto t = boost::json::value_to<selector>(val);
+  auto t = boost::json::value_to<keypath>(val);
   assert(t.headeq("foo"));
   std::cout << str << "\n";
 }

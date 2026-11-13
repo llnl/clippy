@@ -2,17 +2,17 @@
 
 # These should probably not be changed, which is why they're not in config.
 
-# The name of the selector key in the meta.json files.
-# these selectors cannot be dropped.
-INITIAL_SELECTOR_KEY = "initial_selectors"
+# The name of the keypath key in the meta.json files.
+# these keypaths cannot be dropped.
+INITIAL_KEYPATH_KEY = "initial_keypaths"
 
 ######
 # Keys found in output from backend.
 ######
-# The name of the selector key in the json returns.
+# The name of the keypath key in the json returns.
 # If this key exists in the results
-# then the selector hierarchy is replaced with its (processed) contents.
-SELECTOR_KEY = "_selectors"
+# then the keypath hierarchy is replaced with its (processed) contents.
+KEYPATH_KEY = "_keypaths"
 # Any internal state kept in the Python frontend.
 STATE_KEY = "_state"
 # This will reference a string to be printed to stdout by the frontend.

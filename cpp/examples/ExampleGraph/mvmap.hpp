@@ -393,14 +393,14 @@ class mvmap {
   // adds a new column (series) to the mvmap and returns true. If already
   // exists, return false
   template <typename V>
-  std::optional<series_proxy<V>> add_series(const std::string &sel,
+  std::optional<series_proxy<V>> add_series(const std::string &kp,
                                             const std::string &desc = "") {
-    if (has_series(sel)) {
+    if (has_series(kp)) {
       return std::nullopt;
     }
-    data[sel] = series<V>{};
-    series_desc[sel] = desc;
-    return series_proxy(sel, desc, std::get<series<V>>(data[sel]), *this);
+    data[kp] = series<V>{};
+    series_desc[kp] = desc;
+    return series_proxy(kp, desc, std::get<series<V>>(data[kp]), *this);
   }
 
   // copies an existing column (series) to a new (unmanifested) column and
@@ -420,77 +420,77 @@ class mvmap {
   }
 
   template <typename V>
-  std::optional<series_proxy<V>> get_series(const std::string &sel) {
-    if (!has_series<V>(sel)) {
+  std::optional<series_proxy<V>> get_series(const std::string &kp) {
+    if (!has_series<V>(kp)) {
       // series doesn't exist or is of the wrong type.
       return std::nullopt;
     }
-    // return series_proxy<V>(sel, this->series_desc.at(sel),
-    //                        std::get<series<V>>(data[sel]), *this);
-    auto foo = series_desc[sel];
-    return series_proxy<V>(sel, foo, std::get<series<V>>(data[sel]), *this);
+    // return series_proxy<V>(kp, this->series_desc.at(kp),
+    //                        std::get<series<V>>(data[kp]), *this);
+    auto foo = series_desc[kp];
+    return series_proxy<V>(kp, foo, std::get<series<V>>(data[kp]), *this);
   }
 
-  bool series_is_string(const std::string &sel) const {
-    return has_series<std::string>(sel);
+  bool series_is_string(const std::string &kp) const {
+    return has_series<std::string>(kp);
   }
 
-  bool series_is_double(const std::string &sel) const {
-    return has_series<double>(sel);
+  bool series_is_double(const std::string &kp) const {
+    return has_series<double>(kp);
   }
 
-  bool series_is_int64_t(const std::string &sel) const {
-    return has_series<int64_t>(sel);
+  bool series_is_int64_t(const std::string &kp) const {
+    return has_series<int64_t>(kp);
   }
 
-  bool series_is_bool(const std::string &sel) const {
-    return has_series<bool>(sel);
+  bool series_is_bool(const std::string &kp) const {
+    return has_series<bool>(kp);
   }
 
   // std::optional<series_proxy<variants>> get_variant_series(
-  //     const std::string &sel) {
-  //   if (!has_series(sel)) {
+  //     const std::string &kp) {
+  //   if (!has_series(kp)) {
   //     return std::nullopt;
   //   }
 
-  //   using vtype = decltype(data[sel]);
-  //   return series_proxy<vtype>(sel, this->series_desc.at(sel),
-  //   data.at(sel),
+  //   using vtype = decltype(data[kp]);
+  //   return series_proxy<vtype>(kp, this->series_desc.at(kp),
+  //   data.at(kp),
   //                              this);
   // }
 
-  void drop_series(const std::string &sel) {
-    if (!has_series(sel)) {
+  void drop_series(const std::string &kp) {
+    if (!has_series(kp)) {
       return;
     }
-    data.erase(sel);
-    series_desc.erase(sel);
+    data.erase(kp);
+    series_desc.erase(kp);
   }
 
-  std::optional<mvmap::variants> get_as_variant(const std::string &sel,
+  std::optional<mvmap::variants> get_as_variant(const std::string &kp,
                                                 const locator &loc) {
-    auto col = data[sel];
+    auto col = data[kp];
     std::optional<mvmap::variants> val;
     std::visit(
-        [&val, sel, loc, this](auto &ser) {
+        [&val, kp, loc, this](auto &ser) {
           using T = std::decay_t<decltype(ser.begin()->second)>;
-          auto sproxy = get_series<std::decay_t<T>>(sel)
+          auto sproxy = get_series<std::decay_t<T>>(kp)
                             .value();  // this is a series_proxy
           val = sproxy.at(loc);
         },
         col);
     return val;
-    // return data[sel][loc.loc];
+    // return data[kp][loc.loc];
   }
 
-  std::optional<mvmap::variants> get_as_variant(const std::string &sel,
+  std::optional<mvmap::variants> get_as_variant(const std::string &kp,
                                                 const K &key) {
-    auto col = data[sel];
+    auto col = data[kp];
     std::optional<mvmap::variants> val;
     std::visit(
-        [&val, sel, key, this](auto &ser) {
+        [&val, kp, key, this](auto &ser) {
           using T = std::decay_t<decltype(ser.begin()->second)>;
-          auto sproxy = get_series<std::decay_t<T>>(sel)
+          auto sproxy = get_series<std::decay_t<T>>(kp)
                             .value();  // this is a series_proxy
           val = sproxy.at(key);
         },

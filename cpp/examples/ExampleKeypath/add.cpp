@@ -10,25 +10,30 @@
 
 namespace boostjsn = boost::json;
 
-static const std::string method_name = "drop";
+static const std::string method_name = "add";
 static const std::string state_name = "INTERNAL";
 
 int main(int argc, char **argv) {
-  clippy::clippy clip{method_name, "Drops a subselector"};
-  clip.add_required<boostjsn::object>("selector", "Parent Selector");
-  clip.add_required_state<std::map<std::string, std::string>>("selector_state",
+  clippy::clippy clip{method_name, "Adds a subpath"};
+  clip.add_required<boostjsn::object>("keypath", "Parent Keypath");
+  clip.add_required<std::string>("subname", "Description of new keypath");
+  clip.add_optional<std::string>("desc", "Description", "EMPTY DESCRIPTION");
+  clip.add_required_state<std::map<std::string, std::string>>("keypath_state",
                                                     "Internal container");
 
   if (clip.parse(argc, argv)) {
     return 0;
   }
 
+
   std::map<std::string, std::string> sstate;
-  if(clip.has_state("selector_state")) {
-    sstate = clip.get_state<std::map<std::string, std::string>>("selector_state");
+  if(clip.has_state("keypath_state")) {
+    sstate = clip.get_state<std::map<std::string, std::string>>("keypath_state");
   } 
   
-  auto jo = clip.get<boostjsn::object>("selector");
+  auto jo = clip.get<boostjsn::object>("keypath");
+  std::string subname = clip.get<std::string>("subname");
+  std::string desc = clip.get<std::string>("desc");
 
   std::string parentname;
   try {
@@ -42,10 +47,11 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  sstate.erase(parentname);
+  sstate[parentname+"."+subname] = desc;
 
-  clip.set_state("selector_state", sstate);
-  clip.update_selectors(sstate);
+
+  clip.set_state("keypath_state", sstate);
+  clip.update_keypaths(sstate);
   clip.return_self();
 
   return 0;
