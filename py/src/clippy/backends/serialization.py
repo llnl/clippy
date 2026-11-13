@@ -11,6 +11,7 @@ import jsonlogic as jl
 from .. import _dynamic_types
 from ..clippy_types import AnyDict
 from ..error import ClippySerializationError
+from ..selectors import Selector
 
 # TODO: SAB 20240204 complete typing here.
 
@@ -35,8 +36,14 @@ class ClippySerializable:
 
     """
 
+    # top-level selector name -> docstring. Each instance gets its own
+    # Selector objects so subselector updates don't leak between instances.
+    _initial_selectors: dict[str, str] = {}
+
     def __init__(self):
         self._state = {}
+        for name, docstr in type(self)._initial_selectors.items():
+            setattr(self, name, Selector(None, name, docstr))
 
     def to_serial(self) -> AnyDict:
         """

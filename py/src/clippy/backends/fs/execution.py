@@ -24,6 +24,7 @@ class NonZeroReturnCodeError(Exception):
         self.execcmd = execcmd
         super().__init__(f"{execcmd} {message}: {return_code}\n{extramsg}")
 
+
 def _stream_exec(
     cmd: list[str],
     submission_dict: AnyDict,

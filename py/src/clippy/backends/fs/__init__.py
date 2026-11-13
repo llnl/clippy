@@ -20,7 +20,6 @@ from ...error import (
     ClippyTypeError,
     ClippyValidationError,
 )
-from ...selectors import Selector
 from ...utils import flat_dict_to_nested
 from ..serialization import ClippySerializable
 from ..version import _check_version
@@ -107,6 +106,9 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
             meta = json.load(json_file)
     # pull the selectors out since we don't want them in the class definition right now
     selectors = meta.pop(clippy_constants.INITIAL_SELECTOR_KEY, {})
+    # Selectors are per-instance (created in ClippySerializable.__init__);
+    # the class only records which ones each instance should get.
+    meta["_initial_selectors"] = selectors
     meta["_name"] = name
     meta["_path"] = path
     meta["_cfg"] = topcfg
@@ -140,11 +142,6 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
 
             _install_method(str(executable), cls, method, docstring, args)
 
-    # add the selectors
-    # this should be in the meta.json file.
-    for selector, docstr in selectors.items():
-        class_logger.debug("adding %s to class", selector)
-        setattr(cls, selector, Selector(None, selector, docstr))
     return cls
 
 
@@ -243,7 +240,6 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
         argdict[clippy_constants.STATE_KEY][clippy_constants.LOGLEVEL_KEY] = self.logger.getEffectiveLevel()
         # Returns python integer that gets converted by cpp
 
-
         # ~ for key in statedesc:
         #     ~ statej[key] = getattr(self, key)
 
@@ -263,7 +259,7 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
             raise ClippyValidationError(stderr)
 
         # call executable and create json output
-        
+
         outj = _run(executable, argdict, self.logger)
 
         # if we have results that have keys that are in our
