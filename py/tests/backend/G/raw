@@ -20,7 +20,7 @@ method = os.path.basename(sys.argv[0])
 desc, args = METHODS[method]
 
 if "--clippy-help" in sys.argv:
-    print(json.dumps({"method_name": method, "desc": desc, "version": "0.5.7", "args": args}))
+    print(json.dumps({"method_name": method, "desc": desc, "version": "0.6.0", "args": args}))
     sys.exit(0)
 
 if "--clippy-validate" in sys.argv:
