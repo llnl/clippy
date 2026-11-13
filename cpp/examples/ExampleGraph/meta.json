@@ -1,6 +1,6 @@
 {
   "__doc__" : "A graph data structure",
-  "initial_selectors" : {
+  "initial_keypaths" : {
     "edge" : "The edges of the graph",
     "node": "The nodes of the graph"
   }

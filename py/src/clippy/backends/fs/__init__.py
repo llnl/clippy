@@ -16,11 +16,11 @@ from ... import constants as clippy_constants
 from ...clippy_types import CLIPPY_CONFIG
 from ...error import (
     ClippyConfigurationError,
-    ClippyInvalidSelectorError,
+    ClippyInvalidKeypathError,
     ClippyTypeError,
     ClippyValidationError,
 )
-from ...selectors import Selector
+from ...keypaths import Keypath
 from ...utils import flat_dict_to_nested
 from ..version import _check_version
 from .config import _fs_config_entries
@@ -92,10 +92,10 @@ def add_backend_path(path: str) -> None:
 
 
 def _init_instance(self):
-    """Give a new instance empty state and its own copies of the class's initial selectors."""
+    """Give a new instance empty state and its own copies of the class's initial keypaths."""
     self._state = {}
-    for name, docstr in type(self)._initial_selectors.items():
-        setattr(self, name, Selector(None, name, docstr))
+    for name, docstr in type(self)._initial_keypaths.items():
+        setattr(self, name, Keypath(None, name, docstr))
 
 
 def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
@@ -105,17 +105,17 @@ def _create_class(name: str, path: str, topcfg: CLIPPY_CONFIG):
     (_name, _path, _cfg) as well, and load class metadata from
     a meta.json file in each class directory. The meta.json
     file typically holds the class's docstring and any initial
-    top-level selectors as a dictionary of selector: docstring."""
+    top-level keypaths as a dictionary of keypath: docstring."""
     metafile = pathlib.Path(path, name, clippy_constants.CLASS_META_FILE)
     meta = {}
     if metafile.exists():
         with open(metafile, encoding="utf-8") as json_file:
             meta = json.load(json_file)
-    # pull the selectors out since we don't want them in the class definition right now
-    selectors = meta.pop(clippy_constants.INITIAL_SELECTOR_KEY, {})
-    # Selectors are per-instance (created in _init_instance);
+    # pull the keypaths out since we don't want them in the class definition right now
+    keypaths = meta.pop(clippy_constants.INITIAL_KEYPATH_KEY, {})
+    # Keypaths are per-instance (created in _init_instance);
     # the class only records which ones each instance should get.
-    meta["_initial_selectors"] = selectors
+    meta["_initial_keypaths"] = keypaths
     # Default constructor for classes without an __init__ executable.
     # If there is one, _define_method replaces this and calls _init_instance itself.
     meta["__init__"] = _init_instance
@@ -233,7 +233,7 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
         """
 
         # special cases for __init__
-        # initialize _state and per-instance selectors
+        # initialize _state and per-instance keypaths
         if name == "__init__":
             _init_instance(self)
 
@@ -292,13 +292,13 @@ def _define_method(cls, name: str, executable: str, docstr: str, arguments: dict
         if clippy_constants.STATE_KEY in outj:
             setattr(self, clippy_constants.STATE_KEY, outj[clippy_constants.STATE_KEY])
 
-        # update selectors if necessary.
-        if clippy_constants.SELECTOR_KEY in outj:
-            d = flat_dict_to_nested(outj[clippy_constants.SELECTOR_KEY])
-            for topsel, subsels in d.items():
-                if not hasattr(self, topsel):
-                    raise ClippyInvalidSelectorError(f"selector {topsel} not found in class; aborting")
-                getattr(self, topsel)._import_from_dict(subsels)
+        # update keypaths if necessary.
+        if clippy_constants.KEYPATH_KEY in outj:
+            d = flat_dict_to_nested(outj[clippy_constants.KEYPATH_KEY])
+            for topkp, subpaths in d.items():
+                if not hasattr(self, topkp):
+                    raise ClippyInvalidKeypathError(f"keypath {topkp} not found in class; aborting")
+                getattr(self, topkp)._import_from_dict(subpaths)
 
         # return result
         if outj.get(clippy_constants.SELF_KEY, False):

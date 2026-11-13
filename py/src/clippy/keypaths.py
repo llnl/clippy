@@ -1,4 +1,4 @@
-"""Custom selectors for clippy."""
+"""Custom keypaths for clippy."""
 
 from __future__ import annotations
 
@@ -8,15 +8,15 @@ from . import constants
 from .clippy_types import AnyDict
 
 
-class Selector(jl.Variable):
-    """A Selector represents a single variable."""
+class Keypath(jl.Variable):
+    """A Keypath represents a single variable."""
 
-    def __init__(self, parent: Selector | None, name: str, docstr: str):
+    def __init__(self, parent: Keypath | None, name: str, docstr: str):
         super().__init__(name, docstr)  # op and o2 are None to represent this as a variable.
         self._parent = parent
         self._name = name
         self._fullname: str = self._name if self._parent is None else f"{self._parent._fullname}.{self._name}"
-        self._subselectors: set[Selector] = set()
+        self._subpaths: set[Keypath] = set()
 
     def __hash__(self):
         return hash(self._fullname)
@@ -28,8 +28,8 @@ class Selector(jl.Variable):
         if acc is None:
             acc = []
         acc.append((self._fullname, self.__doc__ or ""))
-        for subsel in self._subselectors:
-            subsel._hierarchy(acc)
+        for subpath in self._subpaths:
+            subpath._hierarchy(acc)
         return acc
 
     def _describe(self):
@@ -40,33 +40,33 @@ class Selector(jl.Variable):
     def __str__(self):
         return repr(self._prepare())
 
-    def _add_subselector(self, name: str, docstr: str):
-        """add a subselector to this selector"""
-        subsel = Selector(self, name, docstr)
-        setattr(self, name, subsel)
-        self._subselectors.add(subsel)
+    def _add_subpath(self, name: str, docstr: str):
+        """add a subpath to this keypath"""
+        subpath = Keypath(self, name, docstr)
+        setattr(self, name, subpath)
+        self._subpaths.add(subpath)
 
-    def _del_subselector(self, name: str):
-        """remove a subselector from this selector"""
-        self._subselectors.remove(getattr(self, name))
+    def _del_subpath(self, name: str):
+        """remove a subpath from this keypath"""
+        self._subpaths.remove(getattr(self, name))
         delattr(self, name)
 
-    def _clear_subselectors(self):
-        """removes all subselectors"""
-        for subsel in self._subselectors:
-            delattr(self, subsel._name)
-        self._subselectors = set()
+    def _clear_subpaths(self):
+        """removes all subpaths"""
+        for subpath in self._subpaths:
+            delattr(self, subpath._name)
+        self._subpaths = set()
 
     def _import_from_dict(self, d: AnyDict, merge: bool = False):
-        """Imports subselectors from a dictionary.
-        If `merge = True`, do not clear subselectors first.
+        """Imports subpaths from a dictionary.
+        If `merge = True`, do not clear subpaths first.
         """
 
         # clear all children
         if not merge:
-            self._clear_subselectors()
+            self._clear_subpaths()
 
-        for name, subdict in d.get(constants.SELECTOR_KEY, {}).items():
+        for name, subdict in d.get(constants.KEYPATH_KEY, {}).items():
             docstr = subdict.get("__doc__", "")
-            self._add_subselector(name, docstr)
+            self._add_subpath(name, docstr)
             getattr(self, name)._import_from_dict(subdict)

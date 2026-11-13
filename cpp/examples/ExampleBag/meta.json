@@ -1,6 +1,6 @@
 {
   "__doc__" : "A bag data structure",
-  "initial_selectors" : {
+  "initial_keypaths" : {
     "value" : "A value in the container"
   }
 }

@@ -9,18 +9,18 @@
 #include <iostream>
 #include <jsonlogic/src.hpp>
 
-#include "clippy/selector.hpp"
+#include "clippy/keypath.hpp"
 #include "examplegraph.hpp"
 
 static const std::string method_name = "extrema";
 static const std::string state_name = "INTERNAL";
-static const std::string sel_state_name = "selectors";
+static const std::string kp_state_name = "keypaths";
 
 int main(int argc, char **argv) {
   clippy::clippy clip{method_name,
-                      "returns the extrema of a series based on selector"};
-  clip.add_required<selector>("selector",
-                              "Existing selector name to calculate extrema");
+                      "returns the extrema of a series based on keypath"};
+  clip.add_required<keypath>("keypath",
+                              "Existing keypath name to calculate extrema");
   clip.add_required_state<examplegraph::examplegraph>(state_name,
                                                       "Internal container");
 
@@ -28,33 +28,33 @@ int main(int argc, char **argv) {
   if (clip.parse(argc, argv)) {
     return 0;
   }
-  auto sel_str = clip.get<selector>("selector");
-  selector sel{sel_str};
+  auto kp_str = clip.get<keypath>("keypath");
+  keypath kp{kp_str};
 
-  bool is_edge_sel = examplegraph::examplegraph::is_edge_selector(sel);
-  bool is_node_sel = examplegraph::examplegraph::is_node_selector(sel);
+  bool is_edge_kp = examplegraph::examplegraph::is_edge_keypath(kp);
+  bool is_node_kp = examplegraph::examplegraph::is_node_keypath(kp);
 
-  if (!is_edge_sel && !is_node_sel) {
-    std::cerr << "Selector must start with either \"edge\" or \"node\""
+  if (!is_edge_kp && !is_node_kp) {
+    std::cerr << "Keypath must start with either \"edge\" or \"node\""
               << std::endl;
     return 1;
   }
 
-  auto tail_opt = sel.tail();
+  auto tail_opt = kp.tail();
   if (!tail_opt) {
-    std::cerr << "Selector must have a tail" << std::endl;
+    std::cerr << "Keypath must have a tail" << std::endl;
     return 1;
   }
-  auto tail_sel = tail_opt.value();
+  auto tail_kp = tail_opt.value();
 
   auto the_graph = clip.get_state<examplegraph::examplegraph>(state_name);
 
-  if (is_edge_sel) {
+  if (is_edge_kp) {
     clip.returns<
         std::map<std::string, std::pair<examplegraph::edge_t, double>>>(
         "min and max keys and values of the series");
-    if (the_graph.has_edge_series<double>(tail_sel)) {
-      auto series = the_graph.get_edge_series<double>(tail_sel);
+    if (the_graph.has_edge_series<double>(tail_kp)) {
+      auto series = the_graph.get_edge_series<double>(tail_kp);
       if (!series) {
         std::cerr << "Edge series not found" << std::endl;
         return 1;
@@ -73,8 +73,8 @@ int main(int argc, char **argv) {
                                         std::get<0>(max_tup.value()));
       }
       clip.to_return(extrema);
-    } else if (the_graph.has_edge_series<int64_t>(tail_sel)) {
-      auto series = the_graph.get_edge_series<int64_t>(tail_sel);
+    } else if (the_graph.has_edge_series<int64_t>(tail_kp)) {
+      auto series = the_graph.get_edge_series<int64_t>(tail_kp);
       if (!series) {
         std::cerr << "Edge series not found" << std::endl;
         return 1;
@@ -97,13 +97,13 @@ int main(int argc, char **argv) {
       std::cerr << "Edge series is an invalid type" << std::endl;
       return 1;
     }
-  } else if (is_node_sel) {
-    if (the_graph.has_edge_series<double>(tail_sel)) {
+  } else if (is_node_kp) {
+    if (the_graph.has_edge_series<double>(tail_kp)) {
       clip.returns<
           std::map<std::string, std::pair<examplegraph::node_t, double>>>(
           "min and max keys and values of the series");
 
-      auto series = the_graph.get_node_series<int64_t>(tail_sel);
+      auto series = the_graph.get_node_series<int64_t>(tail_kp);
       if (!series) {
         std::cerr << "Edge series not found" << std::endl;
         return 1;
@@ -123,12 +123,12 @@ int main(int argc, char **argv) {
       }
 
       clip.to_return(extrema);
-    } else if (the_graph.has_node_series<int64_t>(tail_sel)) {
+    } else if (the_graph.has_node_series<int64_t>(tail_kp)) {
       clip.returns<
           std::map<std::string, std::pair<examplegraph::node_t, int64_t>>>(
           "min and max keys and values of the series");
 
-      auto series = the_graph.get_node_series<int64_t>(tail_sel);
+      auto series = the_graph.get_node_series<int64_t>(tail_kp);
       if (!series) {
         return 1;
       }

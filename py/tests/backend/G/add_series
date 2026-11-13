@@ -35,7 +35,7 @@ elif method == "add_series":
     series = [*state.get("series", []), inp["name"]]
     out = {
         "_state": {"path": state.get("path"), "series": series},
-        "_selectors": {f"node.{s}": f"series {s}" for s in series},
+        "_keypaths": {f"node.{s}": f"series {s}" for s in series},
     }
 elif method == "raw":
     out = {"returns": {"__clippy_type__": {"__module__": "clippy", "__class__": "G", "state": state}}}

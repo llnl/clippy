@@ -1,1 +1,1 @@
-{"__doc__": "fake", "initial_selectors": {"node": "nodes", "edge": "edges"}}
+{"__doc__": "fake", "initial_keypaths": {"node": "nodes", "edge": "edges"}}

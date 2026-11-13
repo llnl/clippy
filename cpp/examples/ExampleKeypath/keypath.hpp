@@ -4,11 +4,11 @@
 #include <string>
 
 namespace examplegraph {
-class selector {
+class keypath {
   std::string name;
 
 public:
-  selector(boost::json::object &jo) {
+  keypath(boost::json::object &jo) {
     try {
       if (jo["expression_type"].as_string() != std::string("jsonlogic")) {
         std::cerr << " NOT A THINGY\n";

@@ -35,16 +35,16 @@ public:
   edgemap() const {
     return edge_table;
   }
-  static inline bool is_edge_selector(const std::string &sel) {
-    return sel.starts_with("edge.");
+  static inline bool is_edge_keypath(const std::string &kp) {
+    return kp.starts_with("edge.");
   }
 
-  static inline bool is_node_selector(const std::string &sel) {
-    return sel.starts_with("node.");
+  static inline bool is_node_keypath(const std::string &kp) {
+    return kp.starts_with("node.");
   }
 
-  static inline bool is_valid_selector(const std::string &sel) {
-    return is_edge_selector(sel) || is_node_selector(sel);
+  static inline bool is_valid_keypath(const std::string &kp) {
+    return is_edge_keypath(kp) || is_node_keypath(kp);
   }
 
   friend void tag_invoke(boost::json::value_from_tag /*unused*/,
@@ -68,38 +68,38 @@ public:
   // this function requires that the "edge." prefix be removed from the name.
   template <typename T>
   std::optional<edge_series_proxy<T>>
-  add_edge_series(const std::string &sel, const std::string &desc = "") {
-    return edge_table.add_series<T>(sel, desc);
+  add_edge_series(const std::string &kp, const std::string &desc = "") {
+    return edge_table.add_series<T>(kp, desc);
   }
 
   template <typename T>
   std::optional<edge_series_proxy<T>>
-  add_edge_series(const std::string &sel, const edge_series_proxy<T> &from,
+  add_edge_series(const std::string &kp, const edge_series_proxy<T> &from,
                   const std::string &desc = "") {
-    return edge_table.add_series<T>(sel, from, desc);
+    return edge_table.add_series<T>(kp, from, desc);
   }
 
-  void drop_edge_series(const std::string &sel) { edge_table.drop_series(sel); }
+  void drop_edge_series(const std::string &kp) { edge_table.drop_series(kp); }
 
   // this function requires that the "node." prefix be removed from the name.
-  void drop_node_series(const std::string &sel) { node_table.drop_series(sel); }
+  void drop_node_series(const std::string &kp) { node_table.drop_series(kp); }
 
   // this function requires that the "node." prefix be removed from the name.
   template <typename T>
   std::optional<node_series_proxy<T>>
-  add_node_series(const std::string &sel, const std::string &desc = "") {
-    return node_table.add_series<T>(sel, desc);
+  add_node_series(const std::string &kp, const std::string &desc = "") {
+    return node_table.add_series<T>(kp, desc);
   }
 
   template <typename T>
   std::optional<edge_series_proxy<T>>
-  add_node_series(const std::string &sel, const node_series_proxy<T> &from,
+  add_node_series(const std::string &kp, const node_series_proxy<T> &from,
                   const std::string &desc = "") {
-    return node_table.add_series<T>(sel, from, desc);
+    return node_table.add_series<T>(kp, from, desc);
   }
   template <typename T>
-  std::optional<edge_series_proxy<T>> get_edge_series(const std::string &sel) {
-    return edge_table.get_series<T>(sel);
+  std::optional<edge_series_proxy<T>> get_edge_series(const std::string &kp) {
+    return edge_table.get_series<T>(kp);
   }
 
   bool copy_edge_series(const std::string &from, const std::string &to,
@@ -113,8 +113,8 @@ public:
   }
 
   template <typename T>
-  std::optional<node_series_proxy<T>> get_node_series(const std::string &sel) {
-    return node_table.get_series<T>(sel);
+  std::optional<node_series_proxy<T>> get_node_series(const std::string &kp) {
+    return node_table.get_series<T>(kp);
   }
 
   [[nodiscard]] size_t nv() const { return node_table.size(); }
@@ -147,48 +147,48 @@ public:
 
   // strips the head off the std::string and passes the tail to the appropriate
   // method.
-  [[nodiscard]] bool has_series(const std::string &sel) const {
-    auto tail = sel.substr(5);
+  [[nodiscard]] bool has_series(const std::string &kp) const {
+    auto tail = kp.substr(5);
 
-    if (is_node_selector(sel)) {
+    if (is_node_keypath(kp)) {
       return has_node_series(tail);
     }
-    if (is_edge_selector(sel)) {
+    if (is_edge_keypath(kp)) {
       return has_edge_series(tail);
     }
     return false;
   }
 
   template <typename T>
-  [[nodiscard]] bool has_series(const std::string &sel) const {
-    auto tail = sel.substr(5);
+  [[nodiscard]] bool has_series(const std::string &kp) const {
+    auto tail = kp.substr(5);
 
-    if (is_node_selector(sel)) {
+    if (is_node_keypath(kp)) {
       return has_node_series<T>(tail);
     }
-    if (is_edge_selector(sel)) {
+    if (is_edge_keypath(kp)) {
       return has_edge_series<T>(tail);
     }
     return false;
   }
 
-  // assumes sel has already been tail'ed.
-  [[nodiscard]] bool has_node_series(const std::string &sel) const {
-    return node_table.has_series(sel);
+  // assumes kp has already been tail'ed.
+  [[nodiscard]] bool has_node_series(const std::string &kp) const {
+    return node_table.has_series(kp);
   }
 
   template <typename T>
-  [[nodiscard]] bool has_node_series(const std::string &sel) const {
-    return node_table.has_series<T>(sel);
+  [[nodiscard]] bool has_node_series(const std::string &kp) const {
+    return node_table.has_series<T>(kp);
   }
 
-  // assumes sel has already been tail'ed.
-  [[nodiscard]] bool has_edge_series(const std::string &sel) const {
-    return edge_table.has_series(sel);
+  // assumes kp has already been tail'ed.
+  [[nodiscard]] bool has_edge_series(const std::string &kp) const {
+    return edge_table.has_series(kp);
   }
   template <typename T>
-  [[nodiscard]] bool has_edge_series(const std::string &sel) const {
-    return edge_table.has_series<T>(sel);
+  [[nodiscard]] bool has_edge_series(const std::string &kp) const {
+    return edge_table.has_series<T>(kp);
   }
 
   [[nodiscard]] std::vector<node_t> out_neighbors(const node_t &node) const {

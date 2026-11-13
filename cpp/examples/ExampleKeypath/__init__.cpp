@@ -12,18 +12,18 @@
 namespace boostjsn = boost::json;
 
 static const std::string method_name = "__init__";
-static const std::string state_name = "selector_state";
+static const std::string state_name = "keypath_state";
 
 int main(int argc, char **argv) {
-  clippy::clippy clip{method_name, "Initializes an ExampleSelector"};
+  clippy::clippy clip{method_name, "Initializes an ExampleKeypath"};
 
   // no object-state requirements in constructor
   if (clip.parse(argc, argv)) {
     return 0;
   }
 
-  std::map<std::string, std::string> map_selectors;
-  clip.set_state(state_name, map_selectors);
+  std::map<std::string, std::string> map_keypaths;
+  clip.set_state(state_name, map_keypaths);
 
   return 0;
 }

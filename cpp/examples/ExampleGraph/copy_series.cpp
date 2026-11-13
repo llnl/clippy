@@ -8,20 +8,20 @@
 #include <iostream>
 
 #include "clippy/clippy.hpp"
-#include "clippy/selector.hpp"
+#include "clippy/keypath.hpp"
 #include "examplegraph.hpp"
 
 static const std::string method_name = "copy_series";
 static const std::string graph_state_name = "INTERNAL";
-static const std::string sel_state_name = "selectors";
+static const std::string kp_state_name = "keypaths";
 
 int main(int argc, char **argv) {
-  clippy::clippy clip{method_name, "Copies a subselector to a new subselector"};
-  clip.add_required<selector>("from_sel", "Source Selector");
-  clip.add_required<selector>("to_sel", "Target Selector");
+  clippy::clippy clip{method_name, "Copies a subpath to a new subpath"};
+  clip.add_required<keypath>("from_kp", "Source Keypath");
+  clip.add_required<keypath>("to_kp", "Target Keypath");
 
-  clip.add_required_state<std::map<selector, std::string>>(
-      sel_state_name, "Internal container for pending selectors");
+  clip.add_required_state<std::map<keypath, std::string>>(
+      kp_state_name, "Internal container for pending keypaths");
   clip.add_required_state<examplegraph::examplegraph>(
       graph_state_name, "Internal state for the graph");
 
@@ -29,54 +29,54 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  auto from_selector = clip.get<selector>("from_sel");
-  auto to_selector = clip.get<selector>("to_sel");
+  auto from_keypath = clip.get<keypath>("from_kp");
+  auto to_keypath = clip.get<keypath>("to_kp");
 
   auto the_graph = clip.get_state<examplegraph::examplegraph>(graph_state_name);
 
-  bool edge_sel = false; // if false, then node selector
-  if (examplegraph::examplegraph::is_edge_selector(from_selector)) {
-    edge_sel = true;
-  } else if (!examplegraph::examplegraph::is_node_selector(from_selector)) {
-    std::cerr << "!! ERROR: from_selector must start with either \"edge\" or "
+  bool edge_kp = false; // if false, then node keypath
+  if (examplegraph::examplegraph::is_edge_keypath(from_keypath)) {
+    edge_kp = true;
+  } else if (!examplegraph::examplegraph::is_node_keypath(from_keypath)) {
+    std::cerr << "!! ERROR: from_keypath must start with either \"edge\" or "
                  "\"node\" (received "
-              << from_selector << ") !!";
+              << from_keypath << ") !!";
     exit(-1);
   }
 
-  if (the_graph.has_series(to_selector)) {
-    std::cerr << "!! ERROR: Selector name " << to_selector
+  if (the_graph.has_series(to_keypath)) {
+    std::cerr << "!! ERROR: Keypath name " << to_keypath
               << " already exists in graph !!" << std::endl;
     exit(-1);
   }
 
-  if (clip.has_state(sel_state_name)) {
-    auto selectors =
-        clip.get_state<std::map<selector, std::string>>(sel_state_name);
-    if (selectors.contains(to_selector)) {
-      std::cerr << "Warning: Using unmanifested selector." << std::endl;
-      selectors.erase(to_selector);
+  if (clip.has_state(kp_state_name)) {
+    auto keypaths =
+        clip.get_state<std::map<keypath, std::string>>(kp_state_name);
+    if (keypaths.contains(to_keypath)) {
+      std::cerr << "Warning: Using unmanifested keypath." << std::endl;
+      keypaths.erase(to_keypath);
     }
-    auto from_selector_tail = from_selector.tail();
-    auto to_selector_tail = to_selector.tail();
-    if (!from_selector_tail.has_value() || !to_selector_tail.has_value()) {
+    auto from_keypath_tail = from_keypath.tail();
+    auto to_keypath_tail = to_keypath.tail();
+    if (!from_keypath_tail.has_value() || !to_keypath_tail.has_value()) {
       std::cerr
-          << "!! ERROR: from_selector and to_selector must have content !!"
+          << "!! ERROR: from_keypath and to_keypath must have content !!"
           << std::endl;
       exit(1);
     }
-    from_selector = from_selector_tail.value();
-    to_selector = to_selector_tail.value();
-    if (edge_sel) {
-      if (!the_graph.copy_edge_series(from_selector, to_selector)) {
-        std::cerr << "!! ERROR: copy failed from " << from_selector << " to "
-                  << to_selector << "!!" << std::endl;
+    from_keypath = from_keypath_tail.value();
+    to_keypath = to_keypath_tail.value();
+    if (edge_kp) {
+      if (!the_graph.copy_edge_series(from_keypath, to_keypath)) {
+        std::cerr << "!! ERROR: copy failed from " << from_keypath << " to "
+                  << to_keypath << "!!" << std::endl;
         exit(1);
       };
     } else {
-      if (!the_graph.copy_node_series(from_selector, to_selector)) {
-        std::cerr << "!! ERROR: copy failed from " << from_selector << " to "
-                  << to_selector << "!!" << std::endl;
+      if (!the_graph.copy_node_series(from_keypath, to_keypath)) {
+        std::cerr << "!! ERROR: copy failed from " << from_keypath << " to "
+                  << to_keypath << "!!" << std::endl;
         exit(1);
       };
     }

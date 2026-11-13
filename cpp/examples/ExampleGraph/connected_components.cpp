@@ -15,58 +15,58 @@
 
 static const std::string method_name = "connected_components";
 static const std::string state_name = "INTERNAL";
-static const std::string sel_state_name = "selectors";
+static const std::string kp_state_name = "keypaths";
 
 int main(int argc, char **argv) {
   clippy::clippy clip{
       method_name,
       "Populates a column containing the component id of each node in a graph"};
   clip.add_required<boost::json::object>(
-      "selector",
-      "Existing selector name into which the component id will be written");
+      "keypath",
+      "Existing keypath name into which the component id will be written");
   clip.add_required_state<examplegraph::examplegraph>(state_name,
                                                       "Internal container");
   clip.add_required_state<std::map<std::string, std::string>>(
-      sel_state_name, "Internal container for selectors");
+      kp_state_name, "Internal container for keypaths");
   clip.returns_self();
   // no object-state requirements in constructor
   if (clip.parse(argc, argv)) {
     return 0;
   }
 
-  auto sel_json = clip.get<boost::json::object>("selector");
+  auto kp_json = clip.get<boost::json::object>("keypath");
 
-  std::string sel;
+  std::string kp;
   try {
-    if (sel_json["expression_type"].as_string() != std::string("jsonlogic")) {
+    if (kp_json["expression_type"].as_string() != std::string("jsonlogic")) {
       std::cerr << " NOT A THINGY " << std::endl;
       exit(-1);
     }
-    sel = sel_json["rule"].as_object()["var"].as_string().c_str();
+    kp = kp_json["rule"].as_object()["var"].as_string().c_str();
   } catch (...) {
     std::cerr << "!! ERROR !!" << std::endl;
     exit(-1);
   }
 
-  if (!sel.starts_with("node.")) {
-    std::cerr << "Selector must be a node subselector" << std::endl;
+  if (!kp.starts_with("node.")) {
+    std::cerr << "Keypath must be a node subpath" << std::endl;
     return 1;
   }
   auto the_graph = clip.get_state<examplegraph::examplegraph>(state_name);
 
-  auto selectors =
-      clip.get_state<std::map<std::string, std::string>>(sel_state_name);
-  if (!selectors.contains(sel)) {
-    std::cerr << "Selector not found" << std::endl;
+  auto keypaths =
+      clip.get_state<std::map<std::string, std::string>>(kp_state_name);
+  if (!keypaths.contains(kp)) {
+    std::cerr << "Keypath not found" << std::endl;
     return 1;
   }
-  auto subsel = sel.substr(5);
-  if (the_graph.has_node_series(subsel)) {
-    std::cerr << "Selector already populated" << std::endl;
+  auto subpath = kp.substr(5);
+  if (the_graph.has_node_series(subpath)) {
+    std::cerr << "Keypath already populated" << std::endl;
     return 1;
   }
 
-  auto cc_o = the_graph.add_node_series<int64_t>(subsel, selectors.at(sel));
+  auto cc_o = the_graph.add_node_series<int64_t>(subpath, keypaths.at(kp));
   if (!cc_o) {
     std::cerr << "Unable to manifest node series" << std::endl;
     return 1;
@@ -116,8 +116,8 @@ int main(int argc, char **argv) {
       });
 
   clip.set_state(state_name, the_graph);
-  // clip.set_state(sel_state_name, selectors);
-  // clip.update_selectors(selectors);
+  // clip.set_state(kp_state_name, keypaths);
+  // clip.update_keypaths(keypaths);
 
   clip.return_self();
   return 0;

@@ -11,13 +11,13 @@
 #include <jsonlogic/src.hpp>
 #include <queue>
 
-#include "clippy/selector.hpp"
+#include "clippy/keypath.hpp"
 #include "examplegraph.hpp"
 #include "where.cpp"
 
 static const std::string method_name = "assign";
 static const std::string state_name = "INTERNAL";
-static const std::string sel_state_name = "selectors";
+static const std::string kp_state_name = "keypaths";
 
 static const std::string always_true = R"({"rule":{"==":[1,1]}})";
 static const std::string never_true = R"({"rule":{"==":[2,1]}})";
@@ -42,8 +42,8 @@ std::optional<boost::json::value> obj_to_val(boost::json::object expr,
 int main(int argc, char **argv) {
   clippy::clippy clip{method_name, "Populates a column with a value"};
   clip.add_required<boost::json::object>(
-      "selector",
-      "Existing selector name into which the value will be written");
+      "keypath",
+      "Existing keypath name into which the value will be written");
 
   clip.add_required<variants>("value", "the value to assign");
 
@@ -55,41 +55,41 @@ int main(int argc, char **argv) {
   clip.add_required_state<examplegraph::examplegraph>(state_name,
                                                       "Internal container");
   clip.add_required_state<std::map<std::string, std::string>>(
-      sel_state_name, "Internal container for selectors");
+      kp_state_name, "Internal container for keypaths");
   clip.returns_self();
   // no object-state requirements in constructor
   if (clip.parse(argc, argv)) {
     return 0;
   }
 
-  auto sel_json = clip.get<boost::json::object>("selector");
-  auto sel_str_opt = obj_to_val(sel_json);
-  if (!sel_str_opt.has_value()) {
+  auto kp_json = clip.get<boost::json::object>("keypath");
+  auto kp_str_opt = obj_to_val(kp_json);
+  if (!kp_str_opt.has_value()) {
     std::cerr << "!! ERROR !!" << std::endl;
     exit(-1);
   }
-  std::string sel_str = sel_str_opt.value().as_string().c_str();
+  std::string kp_str = kp_str_opt.value().as_string().c_str();
 
-  auto sel = selector(sel_str);
-  bool is_node_sel = sel.headeq("node");
-  if (!is_node_sel && !sel.headeq("edge")) {
-    std::cerr << "Selector must start with \"node\" or \"edge\"" << std::endl;
+  auto kp = keypath(kp_str);
+  bool is_node_kp = kp.headeq("node");
+  if (!is_node_kp && !kp.headeq("edge")) {
+    std::cerr << "Keypath must start with \"node\" or \"edge\"" << std::endl;
     return 1;
   }
 
-  auto sel_tail_opt = sel.tail();
-  if (!sel_tail_opt.has_value()) {
-    std::cerr << "Selector must have a tail" << std::endl;
+  auto kp_tail_opt = kp.tail();
+  if (!kp_tail_opt.has_value()) {
+    std::cerr << "Keypath must have a tail" << std::endl;
     return 1;
   }
 
-  selector subsel = sel_tail_opt.value();
+  keypath subpath = kp_tail_opt.value();
   auto the_graph = clip.get_state<examplegraph::examplegraph>(state_name);
 
-  auto selectors =
-      clip.get_state<std::map<std::string, std::string>>(sel_state_name);
-  if (!selectors.contains(sel)) {
-    std::cerr << "Selector not found" << std::endl;
+  auto keypaths =
+      clip.get_state<std::map<std::string, std::string>>(kp_state_name);
+  if (!keypaths.contains(kp)) {
+    std::cerr << "Keypath not found" << std::endl;
     return 1;
   }
 
@@ -108,16 +108,16 @@ int main(int argc, char **argv) {
 
   // std::cerr << "val = " << val << ", val.kind() = " << val.kind() <<
   // std::endl;
-  if (is_node_sel) {
-    if (the_graph.has_node_series(subsel)) {
-      std::cerr << "Selector already populated" << std::endl;
+  if (is_node_kp) {
+    if (the_graph.has_node_series(subpath)) {
+      std::cerr << "Keypath already populated" << std::endl;
       return 1;
     }
 
     auto nodemap = the_graph.nodemap();
     auto where = parse_where_expression(nodemap, where_exp, submission_data);
     if (std::holds_alternative<bool>(val)) {
-      auto col_opt = the_graph.add_node_series<bool>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<bool>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
             }
           });
     } else if (std::holds_alternative<double>(val)) {
-      auto col_opt = the_graph.add_node_series<double>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<double>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
             }
           });
     } else if (std::holds_alternative<int64_t>(val)) {
-      auto col_opt = the_graph.add_node_series<int64_t>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<int64_t>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
             }
           });
     } else if (std::holds_alternative<std::string>(val)) {
-      auto col_opt = the_graph.add_node_series<std::string>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<std::string>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -174,13 +174,13 @@ int main(int argc, char **argv) {
           });
     } else if (std::holds_alternative<boost::json::object>(val)) {
       auto col_opt =
-          the_graph.add_node_series<boost::json::object>(subsel, desc);
+          the_graph.add_node_series<boost::json::object>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
       }
     case boost::json::kind::bool_: {
-      auto col_opt = the_graph.add_node_series<bool>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<bool>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
       break;
     }
     case boost::json::kind::double_: {
-      auto col_opt = the_graph.add_node_series<double>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<double>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
     }
 
     case boost::json::kind::int64: {
-      auto col_opt = the_graph.add_node_series<int64_t>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<int64_t>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
     }
 
     case boost::json::kind::string: {
-      auto col_opt = the_graph.add_node_series<std::string>(subsel, desc);
+      auto col_opt = the_graph.add_node_series<std::string>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest node series" << std::endl;
         return 1;
@@ -252,8 +252,8 @@ int main(int argc, char **argv) {
       return 1;
     }
   } else { // edge map
-    if (the_graph.has_edge_series(subsel)) {
-      std::cerr << "Selector already populated" << std::endl;
+    if (the_graph.has_edge_series(subpath)) {
+      std::cerr << "Keypath already populated" << std::endl;
       return 1;
     }
 
@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
     auto where = parse_where_expression(edgemap, where_exp, submission_data);
     switch (val.kind()) {
     case boost::json::kind::bool_: {
-      auto col_opt = the_graph.add_edge_series<bool>(subsel, desc);
+      auto col_opt = the_graph.add_edge_series<bool>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest edge series" << std::endl;
         return 1;
@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
       break;
     }
     case boost::json::kind::double_: {
-      auto col_opt = the_graph.add_edge_series<double>(subsel, desc);
+      auto col_opt = the_graph.add_edge_series<double>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest edge series" << std::endl;
         return 1;
@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
     }
 
     case boost::json::kind::int64: {
-      auto col_opt = the_graph.add_edge_series<int64_t>(subsel, desc);
+      auto col_opt = the_graph.add_edge_series<int64_t>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest edge series" << std::endl;
         return 1;
@@ -312,7 +312,7 @@ int main(int argc, char **argv) {
     }
 
     case boost::json::kind::string: {
-      auto col_opt = the_graph.add_edge_series<std::string>(subsel, desc);
+      auto col_opt = the_graph.add_edge_series<std::string>(subpath, desc);
       if (!col_opt.has_value()) {
         std::cerr << "Unable to manifest edge series" << std::endl;
         return 1;
@@ -334,8 +334,8 @@ int main(int argc, char **argv) {
   }
 
   clip.set_state(state_name, the_graph);
-  clip.set_state(sel_state_name, selectors);
-  clip.update_selectors(selectors);
+  clip.set_state(kp_state_name, keypaths);
+  clip.update_keypaths(keypaths);
 
   clip.return_self();
   return 0;

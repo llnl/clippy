@@ -98,7 +98,7 @@ class clippy {
   ~clippy() {
     const bool requiresResponse =
         !(m_json_return.is_null() && m_json_state.empty() &&
-          m_json_overwrite_args.empty() && m_json_selectors.is_null());
+          m_json_overwrite_args.empty() && m_json_keypaths.is_null());
 
     if (requiresResponse) {
       int rank = 0;
@@ -159,9 +159,9 @@ class clippy {
         boost::json::value_from(default_val);
   }
 
-  void update_selectors(
-      const std::map<std::string, std::string> &map_selectors) {
-    m_json_selectors = boost::json::value_from(map_selectors);
+  void update_keypaths(
+      const std::map<std::string, std::string> &map_keypaths) {
+    m_json_keypaths = boost::json::value_from(map_keypaths);
   }
 
   template <typename T>
@@ -337,8 +337,8 @@ class clippy {
     //   no state -> no state update
     if (!m_json_state.empty()) json_response[state_key] = m_json_state;
 
-    if (!m_json_selectors.is_null())
-      json_response[selectors_key] = m_json_selectors;
+    if (!m_json_keypaths.is_null())
+      json_response[keypaths_key] = m_json_keypaths;
 
     // only communicate the pass by reference arguments if explicitly set
     if (!m_json_overwrite_args.empty())
@@ -481,7 +481,7 @@ class clippy {
   boost::json::value m_json_config;
   boost::json::value m_json_input;
   boost::json::value m_json_return;
-  boost::json::value m_json_selectors;
+  boost::json::value m_json_keypaths;
   boost::json::object m_json_state;
   boost::json::object m_json_overwrite_args;
   bool m_returns_self = false;
@@ -494,7 +494,7 @@ class clippy {
 
  public:
   static constexpr const char *const state_key = "_state";
-  static constexpr const char *const selectors_key = "_selectors";
+  static constexpr const char *const keypaths_key = "_keypaths";
   static constexpr const char *const returns_key = "returns";
   static constexpr const char *const class_name_key = "class_name";
   static constexpr const char *const class_desc_key = "class_desc";
