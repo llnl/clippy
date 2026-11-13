@@ -12,6 +12,8 @@ import sys
 METHODS = {
     "__init__": ("create a fake graph", {"path": {"desc": "storage path", "position": 0}}),
     "add_series": ("add a node series", {"name": {"desc": "series name", "position": 0}}),
+    "raw": ("return a __clippy_type__-shaped dict", {}),
+    "ping": ("return pong", {}),
 }
 
 method = os.path.basename(sys.argv[0])
@@ -35,5 +37,9 @@ elif method == "add_series":
         "_state": {"path": state.get("path"), "series": series},
         "_selectors": {f"node.{s}": f"series {s}" for s in series},
     }
+elif method == "raw":
+    out = {"returns": {"__clippy_type__": {"__module__": "clippy", "__class__": "G", "state": state}}}
+elif method == "ping":
+    out = {"returns": "pong"}
 
 print(json.dumps(out))

@@ -30,12 +30,6 @@ class ClippyValidationError(ClippyError):
     """
 
 
-class ClippySerializationError(ClippyError):
-    """
-    This error should be thrown when clippy object serialization fails
-    """
-
-
 class ClippyClassInconsistencyError(ClippyError):
     """
     This error represents a class inconsistency error (name or docstring mismatch).

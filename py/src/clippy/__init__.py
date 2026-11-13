@@ -17,9 +17,6 @@ __version__ = (Path(__file__).parent / "VERSION").read_text().strip()
 # Create the main configuraton object and expose it globally.
 cfg = CLIPPY_CONFIG(_clippy_cfg)
 
-# expose for serialization.
-_dynamic_types: AnyDict = {}
-
 # Set up logging
 logfmt = logging.Formatter(cfg.get("logformat"))
 logger = logging.getLogger(cfg.get("logname"))

@@ -5,7 +5,7 @@ import json
 import pytest
 
 import clippy
-from clippy.backends.serialization import encode_clippy_json
+from clippy.backends.fs.execution import encode_clippy_json
 from clippy.selectors import Selector
 
 # G is a fake, test-only class. clippy's fs backend generates one class per
@@ -16,6 +16,9 @@ from clippy.selectors import Selector
 # script, dispatching on its own filename) becomes a method. add_series returns
 # a `_selectors` update, which is what exercises per-instance selectors.
 G = clippy.G
+# NoInit (py/tests/backend/NoInit/) is built the same way but has no __init__
+# executable, so instances are set up by the default constructor alone.
+NoInit = clippy.NoInit
 
 
 @pytest.fixture
@@ -64,3 +67,17 @@ def test_where_clause_serializes(a):
     out = json.loads(json.dumps(a.node.pagerank > 3, default=encode_clippy_json))
     assert out["expression_type"] == "jsonlogic"
     assert {"var": "node.pagerank"} in out["rule"][">"]
+
+
+def test_class_without_init_executable():
+    x, y = NoInit(), NoInit()
+    assert x._state == {}
+    assert isinstance(x.node, Selector)
+    assert x.node is not y.node
+    assert x.ping() == "pong"
+
+
+def test_clippy_type_return_is_plain_dict(a):
+    ret = a.raw()
+    assert isinstance(ret, dict)
+    assert ret["__clippy_type__"]["__class__"] == "G"
